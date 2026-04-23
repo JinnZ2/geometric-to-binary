@@ -1,158 +1,99 @@
-# Geometric to Binary — Physics Playground
+# Geometric to Binary: A Physics Playground
 
-A symbolic sandbox for mixing, matching, and morphing physics equations across 23 domains. Built on SymPy and NetworkX, this repository implements the "geometric to binary" vision: a navigable state space where equations are nodes, transformations are weighted edges, and every cross-domain analogy is a traversable path.
+This repository is an experimental symbolic and numerical playground designed to explore the mathematical structure connecting different domains of physics. 
 
----
-
-## Architecture
-
-```
-EquationRegistry          EquationGraph
-─────────────────         ──────────────────────────────────────
-PhysicsEquation ──────►  node (equation name)
-  .name                    .domain
-  .domain                  .description
-  .symbolic_expr           .latex
-  .latex
-  .description         Morphism ──────────────────────────────►  edge
-                         .name                weight = α·dim + β·con + γ·dist
-                         .source_eq / .target_eq
-                         .description
-                         .invariants_preserved
-```
-
-**Weight formula** for each directed edge:
-
-```
-w = α·dimensional_inconsistency + β·constraint_violation + γ·domain_distance
-    (α=0.4)                        (β=0.3)                  (γ=0.3, scale 0–3)
-```
-
-Lower weight = more natural / physically motivated transformation.
+It treats physical equations not as isolated laws, but as **nodes in a continuous geometric space**. By applying mathematical "morphisms" (like the Madelung transform or the Fokker-Planck diffusion limit), you can continuously deform a classical system into a quantum one, or a quantum system into a chaotic strange attractor.
 
 ---
 
-## Registry: 90 Equations across 23 Domains
+## 🏗️ Core Architecture
 
-| Domain | Equations |
-|---|---|
-| **Classical Mechanics** | `newton_2`, `harmonic_oscillator`, `lagrangian_free_particle`, `euler_lagrange`, `energy_conservation` |
-| **Electromagnetism** | `wave_equation_1d`, `coulombs_law`, `faradays_law`, `poynting_vector` |
-| **Quantum Mechanics** | `schrodinger_free`, `probability_current`, `heisenberg_uncertainty`, `qho_energy_levels`, `de_broglie` |
-| **Thermodynamics** | `first_law_thermo`, `second_law_entropy`, `ideal_gas_law`, `boltzmann_entropy` |
-| **Fluid Dynamics** | `continuity_1d`, `euler_momentum_1d`, `navier_stokes_1d`, `bernoulli` |
-| **Statistical Mechanics** | `boltzmann_factor`, `partition_function`, `maxwell_boltzmann_speed` |
-| **Special Relativity** | `mass_energy_equivalence`, `lorentz_factor`, `relativistic_momentum`, `spacetime_interval` |
-| **General Relativity** | `einstein_field_equation`, `schwarzschild_metric_tt`, `geodesic_equation` |
-| **Plasma Physics** | `plasma_frequency`, `debye_length`, `vlasov_1d` |
-| **Optics** | `snells_law`, `thin_lens`, `paraxial_helmholtz`, `rayleigh_criterion` |
-| **Condensed Matter** | `drude_conductivity`, `bloch_dispersion_1d`, `bcs_gap_equation`, `fermi_dirac` |
-| **Nuclear Physics** | `radioactive_decay`, `semf_binding_energy`, `yukawa_potential` |
-| **Astrophysics** | `hydrostatic_equilibrium`, `stellar_mass_continuity`, `virial_theorem`, `jeans_mass` |
-| **Nonlinear Dynamics** | `logistic_map`, `lorenz_x`, `van_der_pol`, `lyapunov_exponent` |
-| **Acoustics** | `acoustic_impedance`, `acoustic_wave_equation`, `doppler_effect` |
-| **Biophysics** | `ficks_first_law`, `ficks_second_law`, `michaelis_menten`, `hodgkin_huxley_membrane` |
-| **Information Theory** | `shannon_entropy`, `shannon_capacity`, `landauer_principle`, `kl_divergence` |
-| **Cosmology** | `hubble_parameter`, `friedmann_first`, `dark_energy_eos`, `redshift_scale_factor` |
-| **High Energy / String** | `klein_gordon`, `nambu_goto_action`, `dirac_1d`, `rg_beta_function` |
-| **Population Dynamics** | `logistic_growth`, `lotka_volterra_prey`, `lotka_volterra_predator`, `replicator_equation`, `wright_fisher_drift` |
-| **Neuroscience** | `fitzhugh_nagumo_v`, `fitzhugh_nagumo_w`, `cable_equation`, `wilson_cowan_E` |
-| **Molecular Biology** | `hill_equation`, `arrhenius`, `turing_activator`, `turing_inhibitor` |
-| **Ecology & Systems Biology** | `fisher_kpp`, `sir_susceptible`, `sir_infected`, `allometric_scaling` |
+The codebase is built on three pillars:
+
+1. **`EquationRegistry`** (`physics_playground.py`)
+   A symbolic database of **90 equations** spanning **23 physics domains** (Classical Mechanics, Quantum, General Relativity, Chaos, Cosmology, Biology, etc.). Each equation is stored as a computable SymPy expression.
+
+2. **`EquationGraph`** (`graph.py`)
+   A fully connected, weighted, directed graph of **112 morphisms**. The graph allows you to find the "shortest conceptual path" between any two equations in physics, weighting paths by dimensional consistency and domain distance.
+
+3. **`PhysicsPlayground`** (`physics_playground.py`)
+   The interactive interface. Use `playground.morph(eq1, eq2)` to discover the transformation path between two disparate physical systems, or `playground.creative_mix()` to algebraically fuse them.
 
 ---
 
-## Graph: 94 Morphism Edges
+## 🚀 Quickstart
 
-Key cross-domain bridges include:
-
-| Morphism | Source → Target | Physical Meaning |
-|---|---|---|
-| `continuity_to_schrodinger_madelung` | `continuity_1d` → `schrodinger_free` | Madelung transform: fluid ↔ quantum |
-| `classical_to_diffusion_morph` | `harmonic_oscillator` → `ficks_second_law` | Propeller morph (MIT droplet style) |
-| `yukawa_to_klein_gordon` | `yukawa_potential` → `klein_gordon` | Static solution of massive scalar field |
-| `optics_to_quantum` | `paraxial_helmholtz` → `schrodinger_free` | Paraxial wave ↔ Schrödinger (z↔t analogy) |
-| `chaos_to_information` | `lyapunov_exponent` → `shannon_entropy` | Kolmogorov-Sinai entropy from chaos |
-| `gr_to_cosmology` | `einstein_field_equation` → `friedmann_first` | FLRW ansatz applied to Einstein equations |
-| `thermo_to_information` | `boltzmann_entropy` → `shannon_entropy` | Thermodynamic ↔ information entropy |
-| `dirac_to_schrodinger` | `dirac_1d` → `schrodinger_free` | Non-relativistic limit of Dirac |
-| `vlasov_to_fluid` | `vlasov_1d` → `continuity_1d` | Velocity moments of Vlasov → fluid |
-| `landauer_to_thermo` | `landauer_principle` → `boltzmann_entropy` | Bit erasure ↔ thermodynamic entropy |
-| `hill_to_fermi_dirac` | `hill_equation` → `fermi_dirac` | Hill equation (n=1) is mathematically identical to Fermi-Dirac |
-| `arrhenius_to_boltzmann` | `arrhenius` → `boltzmann_factor` | Reaction rate as a Boltzmann factor over activation energy |
-| `wright_fisher_to_schrodinger` | `wright_fisher_drift` → `schrodinger_free` | Genetic drift diffusion ↔ quantum diffusion |
-| `fitzhugh_nagumo_to_van_der_pol` | `fitzhugh_nagumo_v` → `van_der_pol` | FitzHugh-Nagumo is a biophysical Van der Pol oscillator |
-| `turing_activator_to_ficks` | `turing_activator` → `ficks_second_law` | Turing pattern formation = diffusion + nonlinear reaction |
-| `allometric_to_rg` | `allometric_scaling` → `rg_beta_function` | Power-law metabolism ↔ RG fixed-point scaling |
-| `fisher_kpp_to_schrodinger` | `fisher_kpp` → `ficks_second_law` → `continuity_1d` → `schrodinger_free` | Reaction-diffusion wave → quantum diffusion (3-hop path) |
-| `sir_to_lotka_volterra` | `sir_infected` → `lotka_volterra_prey` | Epidemic dynamics mirror predator-prey coupling |
-
----
-
-## Setup
-
-### Requirements
-
+**1. Install dependencies:**
 ```bash
-pip install sympy networkx
+pip install -r requirements.txt
 ```
 
-### Run the playground
-
+**2. Run the interactive playground:**
 ```bash
 python physics_playground.py
 ```
 
-### Run the graph
-
+**3. Run all simulations:**
 ```bash
-python graph.py
+python run_all_sims.py --list    # List all 44 simulations
+python run_all_sims.py           # Run everything (saves to plots/)
 ```
 
 ---
 
-## Usage Examples
+## 🧪 The Simulation Hierarchy
+
+The repo includes 44 numerical simulations that prove the math works. They are split across four conceptual levels:
+
+### 1. Domain Physics (`sims.py` — 26 sims)
+Standard numerical simulations of the 90 registry equations. Covers everything from quantum tunneling and Schwarzschild orbits to the Lotka-Volterra predator-prey dynamics and Turing pattern formation.
+
+### 2. The Madelung / Ricci Flow Level (`workon_sims.py` — 9 sims)
+Explores how adding a "curvature feedback" term to classical diffusion *forces* quantum mechanics to appear. Shows how this feedback eventually shatters the quantum spectrum, leading to self-trapped solitons and Ricci flow curvature islands.
+*(Read the plain-language guide: [`WorkOn_Explainer.md`](WorkOn_Explainer.md))*
+
+### 3. The Quantum-to-Chaos Level (`todo_sims.py` — 4 sims)
+Proves the **Lorenz-PDE Isomorphism**: the quantum fluid equation and the Lorenz chaos equations share the exact same mathematical structure. Shows how a single Unified Action Functional produces quantum, soliton, and chaotic regimes just by turning one dial ($\Lambda$).
+*(Read the plain-language guide: [`Todo_Explainer.md`](Todo_Explainer.md))*
+
+### 4. The Metric Bundle Level (`addon_sims.py` — 5 sims)
+Scales the theory up to a "Geometry of Geometries." Simulates the 4D Phase Diagram of Physics, the DeWitt supermetric distance between different universes, entanglement as geometric curvature, and signature transitions as topological holonomies.
+*(Read the plain-language guide: [`Addon_Explainer.md`](Addon_Explainer.md))*
+
+---
+
+## 🧬 Example: Morphing Across Domains
+
+You can use the graph to find paths between completely unrelated fields of science.
 
 ```python
 from physics_playground import PhysicsPlayground
-from graph import build_morphism_graph, EquationRegistry
 
-# --- Registry ---
-playground = PhysicsPlayground()
-print(playground.info("klein_gordon"))
+pg = PhysicsPlayground()
+result = pg.morph('harmonic_oscillator', 'klein_gordon')
 
-# Propeller morph: classical → quantum-diffusion
-morphed = playground.creative_mix("harmonic_oscillator", operation="morph")
+for step in result['steps']:
+    print(f"{step['from']} → {step['to']}: {step['morphism']}")
+```
 
-# Cross-domain algebraic mix
-mixed = playground.registry.mix("continuity_1d", "schrodinger_free", "add")
-
-# --- Graph ---
-registry = EquationRegistry()
-graph    = build_morphism_graph(registry)
-
-# Shortest path between two equations
-path = graph.path("harmonic_oscillator", "klein_gordon")
-print(" → ".join(path))
-
-# All transformation routes (cutoff = 4 hops)
-for p in graph.all_paths("continuity_1d", "schrodinger_free", cutoff=4):
-    print(" → ".join(p))
-
-# Everything reachable from a starting equation
-print(graph.reachable_from("harmonic_oscillator"))
-
-# Equations in a specific domain
-print(graph.domain_cluster(PhysicsDomain.QUANTUM))
+**Output:**
+```text
+harmonic_oscillator → ficks_second_law: classical_to_diffusion_morph
+ficks_second_law → continuity_1d: diffusion_to_fokker_planck
+continuity_1d → schrodinger_free: continuity_to_schrodinger_madelung
+schrodinger_free → klein_gordon: schrodinger_to_klein_gordon
 ```
 
 ---
 
-## Planned Extensions
+## ✅ Running Tests
 
-1. **Geometry Layer**: `sympy.Expr` → `lambdify` → NumPy field → voxel / point cloud (the "geometric → binary" bridge).
-2. **Madelung Transform**: Full symbolic implementation connecting `continuity_1d` + `euler_momentum_1d` ↔ `schrodinger_free`.
-3. **Action → Phase**: Map `lagrangian_free_particle` → quantum phase via `ψ = exp(iS/ħ)`.
-4. **Dimensional Consistency Filter**: Attach SI dimensions to symbols; reject or flag invalid mixes.
-5. **Jupyter Frontend**: Interactive sliders for parameters with live LaTeX rendering.
-6. **Graph Embedding**: Embed the equation graph into a continuous vector space; treat morphisms as flows.
+The repo includes a full `pytest` suite that verifies registry completeness, graph connectivity, and symbolic morphing.
+
+```bash
+pytest tests/ -v
+```
+
+---
+
+*This project is an open-ended exploration of the mathematical unity of physics. Pull requests for new equations, morphisms, or simulations are welcome.*

@@ -1303,6 +1303,48 @@ class PhysicsPlayground:
                 return morphed.apply_diffusion_morphism()
         raise ValueError(f"Unknown creative operation: {operation}")
 
+    def morph(self, source: str, target: str) -> dict:
+        """
+        Find the shortest morphism path from source equation to target equation
+        and return a dict with the path, edge descriptions, and total weight.
+
+        Example
+        -------
+        >>> pg = PhysicsPlayground()
+        >>> result = pg.morph('harmonic_oscillator', 'klein_gordon')
+        >>> print(result['path'])
+        >>> print(result['total_weight'])
+        """
+        import graph as _graph
+        import networkx as _nx
+        eq_graph = _graph.build_morphism_graph(self.registry)
+        try:
+            path = eq_graph.path(source, target)
+        except (_nx.NetworkXNoPath, _nx.NodeNotFound) as exc:
+            return {"path": [], "steps": [], "total_weight": float("inf"),
+                    "error": str(exc)}
+        steps = []
+        total_weight = 0.0
+        for i in range(len(path) - 1):
+            src, tgt = path[i], path[i + 1]
+            edge_data    = eq_graph.G.get_edge_data(src, tgt) or {}
+            morphism_key = edge_data.get("morphism", "unknown")
+            description  = edge_data.get("description", "")
+            weight       = edge_data.get("weight", 0.0)
+            total_weight += weight
+            steps.append({
+                "from":        src,
+                "to":          tgt,
+                "morphism":    morphism_key,
+                "description": description,
+                "weight":      round(weight, 4),
+            })
+        return {
+            "path":         path,
+            "steps":        steps,
+            "total_weight": round(total_weight, 4),
+        }
+
     def run_example(self):
         print("=" * 65)
         print("  PHYSICS PLAYGROUND: Geometric → Binary")

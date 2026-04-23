@@ -894,6 +894,98 @@ def build_morphism_graph(registry: EquationRegistry) -> EquationGraph:
       "Metabolic scaling can be derived from statistical mechanics of fractal distribution networks.",
       dim=0.2, con=0.2)
 
+    # ----------------------------------------------------------
+    # BRIDGING EDGES — connect isolated nodes and small components
+    # ----------------------------------------------------------
+
+    # Electromagnetism islands → main component
+    M("coulomb_to_poisson",
+      "coulombs_law", "schrodinger_free",
+      "Coulomb potential appears directly in the hydrogen atom Schrödinger equation.",
+      dim=0.1, con=0.2, inv=["potential"])
+    M("faraday_to_wave",
+      "faradays_law", "wave_equation_1d",
+      "Faraday's law combined with Ampere's law yields the electromagnetic wave equation.",
+      dim=0.0, con=0.1, inv=["field"])
+    M("poynting_to_acoustic",
+      "poynting_vector", "acoustic_wave_equation",
+      "Poynting vector (EM energy flux) is the electromagnetic analogue of acoustic intensity flux.",
+      dim=0.1, con=0.2, inv=["energy_flux"])
+    M("coulomb_to_yukawa",
+      "coulombs_law", "yukawa_potential",
+      "Yukawa potential is the massive (screened) generalisation of the Coulomb potential.",
+      dim=0.0, con=0.1, inv=["potential"])
+
+    # Thermodynamics islands → main component
+    M("first_law_to_energy_conservation",
+      "first_law_thermo", "energy_conservation",
+      "First law of thermodynamics is energy conservation applied to heat and work.",
+      dim=0.0, con=0.0, inv=["energy"])
+    M("second_law_to_boltzmann_entropy",
+      "second_law_entropy", "boltzmann_entropy",
+      "Boltzmann's S=k ln W is the statistical mechanical derivation of the second law.",
+      dim=0.0, con=0.0, inv=["entropy"])
+    M("second_law_to_shannon",
+      "second_law_entropy", "shannon_entropy",
+      "Shannon entropy is the information-theoretic form of thermodynamic entropy (Jaynes).",
+      dim=0.1, con=0.1, inv=["entropy"])
+
+    # Optics islands → main component
+    M("thin_lens_to_paraxial",
+      "thin_lens", "paraxial_helmholtz",
+      "Thin lens equation is the ray-optics limit of the paraxial Helmholtz wave equation.",
+      dim=0.0, con=0.1, inv=["wavelength"])
+    M("rayleigh_to_de_broglie",
+      "rayleigh_criterion", "de_broglie",
+      "Rayleigh resolution limit applies to matter waves via the de Broglie wavelength.",
+      dim=0.1, con=0.1, inv=["wavelength"])
+
+    # Acoustics islands → main component
+    M("acoustic_impedance_to_wave",
+      "acoustic_impedance", "acoustic_wave_equation",
+      "Acoustic impedance Z=ρv_s is a material property that appears in the wave equation boundary conditions.",
+      dim=0.0, con=0.0, inv=["impedance"])
+    M("doppler_to_wave",
+      "doppler_effect", "acoustic_wave_equation",
+      "Doppler shift is a direct consequence of the acoustic wave equation for a moving source.",
+      dim=0.0, con=0.0, inv=["frequency"])
+
+    # Information theory island → main component
+    M("shannon_capacity_to_entropy",
+      "shannon_capacity", "shannon_entropy",
+      "Shannon channel capacity is derived from the entropy of the input/output distributions.",
+      dim=0.0, con=0.0, inv=["entropy"])
+
+    # Biology pair equations → main component
+    M("lotka_volterra_predator_to_prey",
+      "lotka_volterra_predator", "lotka_volterra_prey",
+      "Predator and prey equations are coupled: predator growth depends on prey density.",
+      dim=0.0, con=0.0, inv=["population"])
+    M("fitzhugh_nagumo_w_to_v",
+      "fitzhugh_nagumo_w", "fitzhugh_nagumo_v",
+      "Recovery variable w is coupled to membrane voltage v in the FitzHugh-Nagumo model.",
+      dim=0.0, con=0.0, inv=["membrane_potential"])
+
+    # Relativity pair → main component
+    M("lorentz_to_spacetime",
+      "lorentz_factor", "spacetime_interval",
+      "Lorentz factor γ is derived from the invariance of the spacetime interval.",
+      dim=0.0, con=0.0, inv=["spacetime_interval"])
+    M("relativistic_momentum_to_mass_energy",
+      "relativistic_momentum", "mass_energy_equivalence",
+      "Relativistic momentum p=γmv and E=γmc² are components of the 4-momentum vector.",
+      dim=0.0, con=0.0, inv=["4-momentum"])
+
+    # Astrophysics pair → main component
+    M("virial_to_hydrostatic",
+      "virial_theorem", "hydrostatic_equilibrium",
+      "Virial theorem is the time-averaged form of hydrostatic equilibrium for bound systems.",
+      dim=0.0, con=0.1, inv=["energy"])
+    M("jeans_to_hydrostatic",
+      "jeans_mass", "hydrostatic_equilibrium",
+      "Jeans mass is the critical mass at which gravity overcomes thermal pressure (hydrostatic balance).",
+      dim=0.0, con=0.1, inv=["pressure"])
+
     return graph
 
 
