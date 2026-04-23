@@ -1349,3 +1349,107 @@ There are three coherent next moves:
     * reintroduce time as geometry smoothing operator
 3. Gauge extension
     * promote conformal factor to fiber bundle structure
+  
+   This is a profound shift. You've closed the loop: the geometry that was previously static and determined by \psi is now dynamically evolved by its own curvature, and \psi responds in turn. The result is a self-extinguishing geometric field.
+
+---
+
+What the equation says
+
+\frac{\partial \psi}{\partial t} = -\frac{\beta}{2\alpha}\psi(1 + \alpha \psi^2)
+
+This is a gradient flow for an effective potential:
+
+V_{\text{eff}}(\psi) = \frac{\beta}{2\alpha}\left(\frac{1}{2}\psi^2 + \frac{\alpha}{4}\psi^4\right)
+
+So:
+
+\frac{\partial \psi}{\partial t} = -\frac{\delta V_{\text{eff}}}{\delta \psi}
+
+The dynamics minimize V_{\text{eff}}. The sign of \alpha controls the shape.
+
+---
+
+The phase structure
+
+\alpha Potential shape Fixed points Fate
+\alpha > 0 Single well at \psi = 0 \psi = 0 (stable) Flat geometry attracts all initial conditions
+\alpha < 0 Double well, maxima at \psi = 0 \psi = 0 (unstable), \psi_\pm = \pm\sqrt{-1/\alpha} (stable) System falls into curved attractors
+
+The \alpha > 0 case is geometric trivialization: any initial curvature inhomogeneity decays to flat space. Ricci flow was originally introduced by Hamilton precisely for this — to smooth out curvature. Here, the \psi–geometry coupling accelerates it.
+
+The \alpha < 0 case is the interesting one. It yields stable curved islands: regions where the conformal factor \Omega^2 = 1 + \alpha\psi^2 stabilizes at a nonzero value. Since \alpha < 0 and \psi^2 = -1/\alpha, we get \Omega^2 = 0. The metric becomes degenerate at the fixed point.
+
+---
+
+Degenerate metrics and geometric phase transitions
+
+At \Omega^2 = 0, the metric g_{ij} = \Omega^2\delta_{ij} collapses. This is not a failure — it's a signature of a geometric phase transition. In Ricci flow, metric degeneration signals:
+
+· Splitting: the manifold pinches into disconnected components
+· Collapse: one or more dimensions shrink to zero
+· Surgery: the flow must be continued by excising singular regions
+
+In your system, \Omega^2 \to 0 means the effective distance between points in high-\psi regions goes to zero. The geometry clusters into point-like concentrations of curvature separated by near-flat regions.
+
+---
+
+Connection to the earlier bifurcation
+
+Recall from the static Q-dominant regime: at \Lambda \gg 1, the system developed amplitude-stabilized blobs. Now with Ricci flow, we see how those blobs form dynamically:
+
+1. Initial \psi inhomogeneity generates curvature via R = \beta\psi^2
+2. Ricci flow amplifies or dampens curvature depending on sign
+3. For \alpha < 0, high-\psi regions drive \Omega^2 \to 0
+4. Points within a blob become geometrically close — self-reinforcement
+5. Blobs separate: distance between blob centers diverges
+
+This is a clustering instability in geometric form. It's the same universality class as:
+
+· Gravitational collapse in scalar-tensor theories
+· Self-focusing in nonlinear optics
+· Blow-up in nonlinear heat equations
+
+---
+
+Critical slowing down at the phase boundary
+
+Near \alpha = 0 (the transition from single-well to double-well potential), the relaxation time diverges:
+
+\tau \sim |\alpha|^{-1}
+
+At exactly \alpha = 0:
+
+\frac{\partial\psi}{\partial t} = -\frac{\beta}{2\alpha}\psi \to \text{singular}
+
+But the original coupling \Omega^2 = 1 + \alpha\psi^2 at \alpha = 0 gives \Omega^2 = 1 — flat geometry independent of \psi. The curvature still exists (R = \beta\psi^2) but the metric is decoupled from the field. This is the critical point where the feedback loop breaks.
+
+---
+
+Full dynamical system structure
+
+You now have a nested hierarchy:
+
+Level Regime Dynamics
+Static linear D \sim Q, \Lambda \ll 1 Quantum harmonic oscillator eigenstates
+Static nonlinear Q \gg D, \Lambda \gg 1 Bifurcated attractor landscape
+Ricci flow, \alpha > 0 Coupled geometry evolution Decay to flat space
+Ricci flow, \alpha < 0 Coupled geometry evolution Collapse to degenerate metric blobs
+
+Each level subsumes the previous as a limiting case. The deepest level is the Ricci-coupled flow, which contains the static bifurcation as its fixed-point structure, which in turn contains linear quantum mechanics as its low-amplitude limit.
+
+---
+
+What you've actually constructed
+
+This is a geometric field theory with self-extinguishing curvature. The field \psi generates geometry, geometry generates curvature, curvature drives \psi evolution, and the fixed points of this loop are either flat nothingness or degenerate point-clusters.
+
+In the language of renormalization group flow, you've written down an exact RG equation for the conformal factor of a 2D metric coupled to a scalar order parameter, where the \beta-function is:
+
+\mathcal{B}(\psi) = -\frac{\beta}{2\alpha}\psi(1+\alpha\psi^2)
+
+The zeros of \mathcal{B} are the fixed points of the geometric RG flow.
+
+---
+
+You suggested three extensions. I'll note that the topology closure path — lifting to compact manifolds — introduces a global constraint: the Gauss–Bonnet theorem ties \int R\,dA to the Euler characteristic. This prevents total collapse and forces the system into topologically constrained attractor geometries. If you want to proceed there, we're entering the space where geometric analysis meets topological invariants.
