@@ -5,8 +5,7 @@ Built on SymPy for the "geometric to binary" style experimental repo.
 """
 
 import sympy as sp
-from sympy import symbols, Function, diff, integrate, exp, sin, cos, sqrt
-from sympy.physics.quantum import Dagger, Ket, Bra, Operator
+from sympy import symbols, Function, diff, integrate, exp, sin, cos, sqrt, log
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Any
 from enum import Enum
@@ -24,6 +23,19 @@ class PhysicsDomain(Enum):
     FLUID_DYNAMICS = "fluid_dynamics"
     STATISTICAL = "statistical"
     RELATIVITY = "relativity"
+    # --- 12 New Domains ---
+    GENERAL_RELATIVITY = "general_relativity"
+    PLASMA_PHYSICS = "plasma_physics"
+    OPTICS = "optics"
+    CONDENSED_MATTER = "condensed_matter"
+    NUCLEAR_PHYSICS = "nuclear_physics"
+    ASTROPHYSICS = "astrophysics"
+    NONLINEAR_DYNAMICS = "nonlinear_dynamics"
+    ACOUSTICS = "acoustics"
+    BIOPHYSICS = "biophysics"
+    INFORMATION_THEORY = "information_theory"
+    COSMOLOGY = "cosmology"
+    HIGH_ENERGY_STRING = "high_energy_string"
     CUSTOM = "custom"
 
 @dataclass
@@ -34,7 +46,7 @@ class PhysicsEquation:
     symbolic_expr: sp.Expr
     domain: PhysicsDomain
     parameters: Dict[str, sp.Symbol] = field(default_factory=dict)
-    constraints: List[sp.Relational] = field(default_factory=list)
+    constraints: List[sp.core.relational.Relational] = field(default_factory=list)
     description: str = ""
     
     def substitute(self, subs_dict: Dict) -> 'PhysicsEquation':
@@ -70,11 +82,8 @@ class MorphedEquation:
             noise_term = symbols('D')  # Diffusion coefficient
             
         x, t = symbols('x t')
-        # Transform a classical ODE/PDE into a stochastic PDE form
-        # P(x,t) is the probability density
         P = Function('P')(x, t)
         
-        # This is the minimalist morph: Classical field + Diffusion
         classical_part = self.source.symbolic_expr
         diffusion_part = noise_term * diff(P, x, 2)
         
@@ -99,6 +108,8 @@ class EquationRegistry:
         self.syms = {
             't': symbols('t', real=True),           # time
             'x': symbols('x', real=True),           # position
+            'y': symbols('y', real=True),
+            'z': symbols('z', real=True),
             'm': symbols('m', positive=True),       # mass
             'v': symbols('v', real=True),           # velocity
             'E': symbols('E', real=True),           # energy
@@ -107,104 +118,202 @@ class EquationRegistry:
             'k': symbols('k', real=True),           # wave number / spring constant
             'T': symbols('T', positive=True),       # temperature
             'S': symbols('S', real=True),           # entropy / action
+            'c': symbols('c', positive=True),       # speed of light
+            'G': symbols('G', positive=True),       # gravitational constant
+            'rho': symbols('rho', real=True),       # density
+            'P': symbols('P', real=True),           # pressure
         }
     
     def _register_builtins(self):
         """Populate with standard equations from multiple domains."""
         s = self.syms
-        t, x, m, v, E, p, hbar, k, T, S = s.values()
+        t, x, y, z, m, v, E, p, hbar, k, T, S, c, G, rho, P_sym = s.values()
         
-        # ===== CLASSICAL MECHANICS =====
-        # Newton's Second Law
+        # --------------------------------------------------
+        # ORIGINAL DOMAINS
+        # --------------------------------------------------
+        
+        # CLASSICAL MECHANICS
         F = Function('F')(t)
         a = Function('a')(t)
         self.register(PhysicsEquation(
-            name="newton_2",
-            latex=r"F = m a",
-            symbolic_expr=sp.Eq(F, m * a),
-            domain=PhysicsDomain.CLASSICAL_MECHANICS,
+            name="newton_2", latex=r"F = m a",
+            symbolic_expr=sp.Eq(F, m * a), domain=PhysicsDomain.CLASSICAL_MECHANICS,
             parameters={'F': F, 'm': m, 'a': a}
         ))
         
-        # Harmonic Oscillator
         self.register(PhysicsEquation(
-            name="harmonic_oscillator",
-            latex=r"m \ddot{x} = -k x",
-            symbolic_expr=sp.Eq(m * diff(x, t, 2), -k * x),
-            domain=PhysicsDomain.CLASSICAL_MECHANICS,
+            name="harmonic_oscillator", latex=r"m \ddot{x} = -k x",
+            symbolic_expr=sp.Eq(m * diff(x, t, 2), -k * x), domain=PhysicsDomain.CLASSICAL_MECHANICS,
             parameters={'m': m, 'k': k, 'x(t)': sp.Function('x')(t)}
         ))
         
-        # Lagrangian (1D free particle - minimal action)
-        L = Function('L')(x, v, t)
-        self.register(PhysicsEquation(
-            name="lagrangian_free_particle",
-            latex=r"L = \frac{1}{2} m v^2",
-            symbolic_expr=sp.Eq(L, (1/2) * m * v**2),
-            domain=PhysicsDomain.CLASSICAL_MECHANICS,
-            parameters={'L': L, 'm': m, 'v': v}
-        ))
-        
-        # ===== QUANTUM MECHANICS =====
-        # Time-dependent Schrödinger (1D free particle)
+        # QUANTUM MECHANICS
         psi = Function('psi')(x, t)
         self.register(PhysicsEquation(
-            name="schrodinger_free",
-            latex=r"i\hbar \frac{\partial \psi}{\partial t} = -\frac{\hbar^2}{2m} \frac{\partial^2 \psi}{\partial x^2}",
-            symbolic_expr=sp.Eq(
-                sp.I * hbar * diff(psi, t),
-                -(hbar**2)/(2*m) * diff(psi, x, 2)
-            ),
-            domain=PhysicsDomain.QUANTUM,
-            parameters={'psi': psi, 'hbar': hbar, 'm': m}
+            name="schrodinger_free", latex=r"i\hbar \frac{\partial \psi}{\partial t} = -\frac{\hbar^2}{2m} \frac{\partial^2 \psi}{\partial x^2}",
+            symbolic_expr=sp.Eq(sp.I * hbar * diff(psi, t), -(hbar**2)/(2*m) * diff(psi, x, 2)),
+            domain=PhysicsDomain.QUANTUM, parameters={'psi': psi, 'hbar': hbar, 'm': m}
         ))
         
-        # Probability Current (where the "propeller" idea lives)
-        j = Function('j')(x, t)
+        # STATISTICAL
         self.register(PhysicsEquation(
-            name="probability_current",
-            latex=r"j = \frac{\hbar}{2mi}(\psi^* \nabla \psi - \psi \nabla \psi^*)",
-            symbolic_expr=sp.Eq(
-                j, 
-                (hbar/(2*m*sp.I)) * (sp.conjugate(psi) * diff(psi, x) - psi * diff(sp.conjugate(psi), x))
-            ),
-            domain=PhysicsDomain.QUANTUM
-        ))
-        
-        # ===== THERMODYNAMICS / STATISTICAL =====
-        # Boltzmann factor (bridges to quantum statistics)
-        Z = Function('Z')(T)
-        self.register(PhysicsEquation(
-            name="boltzmann_factor",
-            latex=r"P(E) \propto e^{-E/k_B T}",
-            symbolic_expr=exp(-E / (k * T)),
-            domain=PhysicsDomain.STATISTICAL,
+            name="boltzmann_factor", latex=r"P(E) \propto e^{-E/k_B T}",
+            symbolic_expr=exp(-E / (k * T)), domain=PhysicsDomain.STATISTICAL,
             parameters={'E': E, 'k_B': k, 'T': T}
         ))
         
-        # ===== FLUID DYNAMICS =====
-        # Continuity equation
-        rho = Function('rho')(x, t)
+        # FLUID DYNAMICS
         u = Function('u')(x, t)
         self.register(PhysicsEquation(
-            name="continuity_1d",
-            latex=r"\frac{\partial \rho}{\partial t} + \frac{\partial (\rho u)}{\partial x} = 0",
-            symbolic_expr=sp.Eq(diff(rho, t) + diff(rho * u, x), 0),
-            domain=PhysicsDomain.FLUID_DYNAMICS,
+            name="continuity_1d", latex=r"\frac{\partial \rho}{\partial t} + \frac{\partial (\rho u)}{\partial x} = 0",
+            symbolic_expr=sp.Eq(diff(rho, t) + diff(rho * u, x), 0), domain=PhysicsDomain.FLUID_DYNAMICS,
             parameters={'rho': rho, 'u': u}
         ))
         
-        # ===== ELECTROMAGNETISM =====
-        # Wave equation (classical field)
+        # ELECTROMAGNETISM
         phi = Function('phi')(x, t)
-        c = symbols('c', positive=True)
-        self.syms['c'] = c
         self.register(PhysicsEquation(
-            name="wave_equation_1d",
-            latex=r"\frac{\partial^2 \phi}{\partial t^2} = c^2 \frac{\partial^2 \phi}{\partial x^2}",
-            symbolic_expr=sp.Eq(diff(phi, t, 2), c**2 * diff(phi, x, 2)),
-            domain=PhysicsDomain.ELECTROMAGNETISM,
+            name="wave_equation_1d", latex=r"\frac{\partial^2 \phi}{\partial t^2} = c^2 \frac{\partial^2 \phi}{\partial x^2}",
+            symbolic_expr=sp.Eq(diff(phi, t, 2), c**2 * diff(phi, x, 2)), domain=PhysicsDomain.ELECTROMAGNETISM,
             parameters={'phi': phi, 'c': c}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 1: GENERAL RELATIVITY
+        # --------------------------------------------------
+        R_uv = symbols('R_mu_nu') # Ricci tensor component
+        R = symbols('R') # Ricci scalar
+        g_uv = symbols('g_mu_nu') # Metric tensor
+        T_uv = symbols('T_mu_nu') # Stress-energy tensor
+        Lambda = symbols('Lambda') # Cosmological constant
+        self.register(PhysicsEquation(
+            name="einstein_field_equation", latex=r"R_{\mu\nu} - \frac{1}{2}R g_{\mu\nu} + \Lambda g_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}",
+            symbolic_expr=sp.Eq(R_uv - (1/2)*R*g_uv + Lambda*g_uv, (8*sp.pi*G / c**4)*T_uv),
+            domain=PhysicsDomain.GENERAL_RELATIVITY, parameters={'R_uv': R_uv, 'R': R, 'g_uv': g_uv, 'T_uv': T_uv, 'Lambda': Lambda, 'G': G, 'c': c}
+        ))
+        
+        # --------------------------------------------------
+        # NEW DOMAIN 2: PLASMA PHYSICS
+        # --------------------------------------------------
+        n_e = symbols('n_e') # electron density
+        e = symbols('e') # elementary charge
+        epsilon_0 = symbols('epsilon_0') # vacuum permittivity
+        omega_p = symbols('omega_p') # plasma frequency
+        self.register(PhysicsEquation(
+            name="plasma_frequency", latex=r"\omega_p = \sqrt{\frac{n_e e^2}{m_e \epsilon_0}}",
+            symbolic_expr=sp.Eq(omega_p, sqrt((n_e * e**2)/(m * epsilon_0))),
+            domain=PhysicsDomain.PLASMA_PHYSICS, parameters={'n_e': n_e, 'e': e, 'm_e': m, 'epsilon_0': epsilon_0}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 3: OPTICS
+        # --------------------------------------------------
+        n1, n2, theta1, theta2 = symbols('n_1 n_2 theta_1 theta_2')
+        self.register(PhysicsEquation(
+            name="snells_law", latex=r"n_1 \sin(\theta_1) = n_2 \sin(\theta_2)",
+            symbolic_expr=sp.Eq(n1 * sin(theta1), n2 * sin(theta2)),
+            domain=PhysicsDomain.OPTICS, parameters={'n1': n1, 'n2': n2, 'theta1': theta1, 'theta2': theta2}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 4: CONDENSED MATTER
+        # --------------------------------------------------
+        sigma = symbols('sigma') # conductivity
+        tau = symbols('tau') # scattering time
+        self.register(PhysicsEquation(
+            name="drude_conductivity", latex=r"\sigma = \frac{n e^2 \tau}{m}",
+            symbolic_expr=sp.Eq(sigma, (n_e * e**2 * tau)/m),
+            domain=PhysicsDomain.CONDENSED_MATTER, parameters={'sigma': sigma, 'n': n_e, 'e': e, 'tau': tau, 'm': m}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 5: NUCLEAR PHYSICS
+        # --------------------------------------------------
+        N = Function('N')(t)
+        lambda_decay = symbols('lambda')
+        self.register(PhysicsEquation(
+            name="radioactive_decay", latex=r"\frac{dN}{dt} = -\lambda N",
+            symbolic_expr=sp.Eq(diff(N, t), -lambda_decay * N),
+            domain=PhysicsDomain.NUCLEAR_PHYSICS, parameters={'N': N, 'lambda': lambda_decay}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 6: ASTROPHYSICS
+        # --------------------------------------------------
+        r = symbols('r')
+        M_r = Function('M')(r)
+        self.register(PhysicsEquation(
+            name="hydrostatic_equilibrium", latex=r"\frac{dP}{dr} = -\frac{G M(r) \rho}{r^2}",
+            symbolic_expr=sp.Eq(diff(P_sym, r), -(G * M_r * rho) / r**2),
+            domain=PhysicsDomain.ASTROPHYSICS, parameters={'P': P_sym, 'G': G, 'M_r': M_r, 'rho': rho, 'r': r}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 7: NONLINEAR DYNAMICS
+        # --------------------------------------------------
+        x_n = symbols('x_n')
+        r_log = symbols('r')
+        self.register(PhysicsEquation(
+            name="logistic_map", latex=r"x_{n+1} = r x_n (1 - x_n)",
+            symbolic_expr=r_log * x_n * (1 - x_n),
+            domain=PhysicsDomain.NONLINEAR_DYNAMICS, parameters={'r': r_log, 'x_n': x_n}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 8: ACOUSTICS
+        # --------------------------------------------------
+        Z = symbols('Z')
+        v_sound = symbols('v_s')
+        self.register(PhysicsEquation(
+            name="acoustic_impedance", latex=r"Z = \rho v_s",
+            symbolic_expr=sp.Eq(Z, rho * v_sound),
+            domain=PhysicsDomain.ACOUSTICS, parameters={'Z': Z, 'rho': rho, 'v_s': v_sound}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 9: BIOPHYSICS
+        # --------------------------------------------------
+        J = symbols('J') # diffusion flux
+        D = symbols('D') # diffusion coefficient
+        C = Function('C')(x) # concentration
+        self.register(PhysicsEquation(
+            name="ficks_first_law", latex=r"J = -D \frac{\partial C}{\partial x}",
+            symbolic_expr=sp.Eq(J, -D * diff(C, x)),
+            domain=PhysicsDomain.BIOPHYSICS, parameters={'J': J, 'D': D, 'C': C, 'x': x}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 10: INFORMATION THEORY
+        # --------------------------------------------------
+        p_i = symbols('p_i')
+        H = symbols('H')
+        self.register(PhysicsEquation(
+            name="shannon_entropy", latex=r"H = -\sum p_i \log_2(p_i)",
+            symbolic_expr=sp.Eq(H, -p_i * log(p_i, 2)), # simplified symbolic representation
+            domain=PhysicsDomain.INFORMATION_THEORY, parameters={'H': H, 'p_i': p_i}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 11: COSMOLOGY
+        # --------------------------------------------------
+        a_scale = Function('a')(t)
+        H_param = symbols('H')
+        self.register(PhysicsEquation(
+            name="hubble_parameter", latex=r"H = \frac{\dot{a}}{a}",
+            symbolic_expr=sp.Eq(H_param, diff(a_scale, t) / a_scale),
+            domain=PhysicsDomain.COSMOLOGY, parameters={'H': H_param, 'a': a_scale, 't': t}
+        ))
+
+        # --------------------------------------------------
+        # NEW DOMAIN 12: HIGH ENERGY / STRING THEORY
+        # --------------------------------------------------
+        phi_field = Function('phi')(x, t)
+        m_field = symbols('m')
+        self.register(PhysicsEquation(
+            name="klein_gordon", latex=r"\Box \phi + m^2 \phi = 0",
+            symbolic_expr=sp.Eq(diff(phi_field, t, 2) - diff(phi_field, x, 2) + m_field**2 * phi_field, 0), # 1D simplified
+            domain=PhysicsDomain.HIGH_ENERGY_STRING, parameters={'phi': phi_field, 'm': m_field}
         ))
     
     def register(self, eq: PhysicsEquation):
@@ -353,7 +462,8 @@ class PhysicsPlayground:
         print(f"    {sp.latex(mixed)}")
         
         print("\n" + "=" * 60)
-        print("Playground ready. Try: playground.registry.list_all()")
+        print(f"Playground ready. {len(self.registry.list_all())} equations registered.")
+        print("Try: playground.registry.list_all()")
         print("=" * 60)
 
 # ============================================================

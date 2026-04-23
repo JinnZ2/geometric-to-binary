@@ -5,15 +5,38 @@ A symbolic sandbox for mixing, matching, and morphing physics equations. Built o
 ## Overview
 
 This project provides a framework for:
-- **Symbolic Manipulation**: Define, manipulate, and solve equations symbolically across different physics domains (Classical Mechanics, Quantum Mechanics, Fluid Dynamics, etc.).
+- **Symbolic Manipulation**: Define, manipulate, and solve equations symbolically across 18 equations spanning 12+ physics domains.
 - **Creative Equation Mixing**: Apply "propeller" transforms (e.g., adding Fokker-Planck stochastic terms to classical deterministic equations) to bridge domains.
 - **Equation Graph Navigation**: Treat equations as nodes and morphisms as edges in a directed graph, enabling the discovery of shortest paths between domains and multi-path retention.
 
 ## Features
 
-- **EquationRegistry**: A central database of physics equations categorized by domain.
+- **EquationRegistry**: A central database of 18 physics equations across 12 domains.
 - **PropellerTransform**: Implements creative mappings, such as the MIT droplet paper trick (Classical Diffusion + Memory Term = Quantum-like Behavior).
 - **EquationGraph**: Navigates the state space of equations, finding minimum-deviation transformation chains.
+
+## Registered Equations
+
+| Name | Domain | Description |
+|---|---|---|
+| `newton_2` | Classical Mechanics | Newton's Second Law |
+| `harmonic_oscillator` | Classical Mechanics | Spring-mass oscillator |
+| `schrodinger_free` | Quantum | Time-dependent Schrödinger (1D free particle) |
+| `boltzmann_factor` | Statistical | Boltzmann probability weight |
+| `continuity_1d` | Fluid Dynamics | 1D mass continuity equation |
+| `wave_equation_1d` | Electromagnetism | Classical 1D wave equation |
+| `einstein_field_equation` | General Relativity | Einstein field equations with cosmological constant |
+| `plasma_frequency` | Plasma Physics | Electron plasma oscillation frequency |
+| `snells_law` | Optics | Snell's law of refraction |
+| `drude_conductivity` | Condensed Matter | Drude model electrical conductivity |
+| `radioactive_decay` | Nuclear Physics | First-order radioactive decay |
+| `hydrostatic_equilibrium` | Astrophysics | Stellar pressure-gravity balance |
+| `logistic_map` | Nonlinear Dynamics | Discrete chaotic logistic map |
+| `acoustic_impedance` | Acoustics | Acoustic impedance relation |
+| `ficks_first_law` | Biophysics | Fick's first law of diffusion |
+| `shannon_entropy` | Information Theory | Shannon information entropy |
+| `hubble_parameter` | Cosmology | Hubble parameter from scale factor |
+| `klein_gordon` | High Energy / String | 1D Klein-Gordon scalar field equation |
 
 ## Setup
 
