@@ -1,89 +1,146 @@
-# Geometric to Binary Physics Playground
+# Geometric to Binary — Physics Playground
 
-A symbolic sandbox for mixing, matching, and morphing physics equations. Built on SymPy, this repository explores the "geometric to binary" style of experimental physics modeling.
+A symbolic sandbox for mixing, matching, and morphing physics equations across 19 domains. Built on SymPy and NetworkX, this repository implements the "geometric to binary" vision: a navigable state space where equations are nodes, transformations are weighted edges, and every cross-domain analogy is a traversable path.
 
-## Overview
+---
 
-This project provides a framework for:
-- **Symbolic Manipulation**: Define, manipulate, and solve equations symbolically across 18 equations spanning 12+ physics domains.
-- **Creative Equation Mixing**: Apply "propeller" transforms (e.g., adding Fokker-Planck stochastic terms to classical deterministic equations) to bridge domains.
-- **Equation Graph Navigation**: Treat equations as nodes and morphisms as edges in a directed graph, enabling the discovery of shortest paths between domains and multi-path retention.
+## Architecture
 
-## Features
+```
+EquationRegistry          EquationGraph
+─────────────────         ──────────────────────────────────────
+PhysicsEquation ──────►  node (equation name)
+  .name                    .domain
+  .domain                  .description
+  .symbolic_expr           .latex
+  .latex
+  .description         Morphism ──────────────────────────────►  edge
+                         .name                weight = α·dim + β·con + γ·dist
+                         .source_eq / .target_eq
+                         .description
+                         .invariants_preserved
+```
 
-- **EquationRegistry**: A central database of 18 physics equations across 12 domains.
-- **PropellerTransform**: Implements creative mappings, such as the MIT droplet paper trick (Classical Diffusion + Memory Term = Quantum-like Behavior).
-- **EquationGraph**: Navigates the state space of equations, finding minimum-deviation transformation chains.
+**Weight formula** for each directed edge:
 
-## Registered Equations
+```
+w = α·dimensional_inconsistency + β·constraint_violation + γ·domain_distance
+    (α=0.4)                        (β=0.3)                  (γ=0.3, scale 0–3)
+```
 
-| Name | Domain | Description |
+Lower weight = more natural / physically motivated transformation.
+
+---
+
+## Registry: 73 Equations across 19 Domains
+
+| Domain | Equations |
+|---|---|
+| **Classical Mechanics** | `newton_2`, `harmonic_oscillator`, `lagrangian_free_particle`, `euler_lagrange`, `energy_conservation` |
+| **Electromagnetism** | `wave_equation_1d`, `coulombs_law`, `faradays_law`, `poynting_vector` |
+| **Quantum Mechanics** | `schrodinger_free`, `probability_current`, `heisenberg_uncertainty`, `qho_energy_levels`, `de_broglie` |
+| **Thermodynamics** | `first_law_thermo`, `second_law_entropy`, `ideal_gas_law`, `boltzmann_entropy` |
+| **Fluid Dynamics** | `continuity_1d`, `euler_momentum_1d`, `navier_stokes_1d`, `bernoulli` |
+| **Statistical Mechanics** | `boltzmann_factor`, `partition_function`, `maxwell_boltzmann_speed` |
+| **Special Relativity** | `mass_energy_equivalence`, `lorentz_factor`, `relativistic_momentum`, `spacetime_interval` |
+| **General Relativity** | `einstein_field_equation`, `schwarzschild_metric_tt`, `geodesic_equation` |
+| **Plasma Physics** | `plasma_frequency`, `debye_length`, `vlasov_1d` |
+| **Optics** | `snells_law`, `thin_lens`, `paraxial_helmholtz`, `rayleigh_criterion` |
+| **Condensed Matter** | `drude_conductivity`, `bloch_dispersion_1d`, `bcs_gap_equation`, `fermi_dirac` |
+| **Nuclear Physics** | `radioactive_decay`, `semf_binding_energy`, `yukawa_potential` |
+| **Astrophysics** | `hydrostatic_equilibrium`, `stellar_mass_continuity`, `virial_theorem`, `jeans_mass` |
+| **Nonlinear Dynamics** | `logistic_map`, `lorenz_x`, `van_der_pol`, `lyapunov_exponent` |
+| **Acoustics** | `acoustic_impedance`, `acoustic_wave_equation`, `doppler_effect` |
+| **Biophysics** | `ficks_first_law`, `ficks_second_law`, `michaelis_menten`, `hodgkin_huxley_membrane` |
+| **Information Theory** | `shannon_entropy`, `shannon_capacity`, `landauer_principle`, `kl_divergence` |
+| **Cosmology** | `hubble_parameter`, `friedmann_first`, `dark_energy_eos`, `redshift_scale_factor` |
+| **High Energy / String** | `klein_gordon`, `nambu_goto_action`, `dirac_1d`, `rg_beta_function` |
+
+---
+
+## Graph: 68 Morphism Edges
+
+Key cross-domain bridges include:
+
+| Morphism | Source → Target | Physical Meaning |
 |---|---|---|
-| `newton_2` | Classical Mechanics | Newton's Second Law |
-| `harmonic_oscillator` | Classical Mechanics | Spring-mass oscillator |
-| `schrodinger_free` | Quantum | Time-dependent Schrödinger (1D free particle) |
-| `boltzmann_factor` | Statistical | Boltzmann probability weight |
-| `continuity_1d` | Fluid Dynamics | 1D mass continuity equation |
-| `wave_equation_1d` | Electromagnetism | Classical 1D wave equation |
-| `einstein_field_equation` | General Relativity | Einstein field equations with cosmological constant |
-| `plasma_frequency` | Plasma Physics | Electron plasma oscillation frequency |
-| `snells_law` | Optics | Snell's law of refraction |
-| `drude_conductivity` | Condensed Matter | Drude model electrical conductivity |
-| `radioactive_decay` | Nuclear Physics | First-order radioactive decay |
-| `hydrostatic_equilibrium` | Astrophysics | Stellar pressure-gravity balance |
-| `logistic_map` | Nonlinear Dynamics | Discrete chaotic logistic map |
-| `acoustic_impedance` | Acoustics | Acoustic impedance relation |
-| `ficks_first_law` | Biophysics | Fick's first law of diffusion |
-| `shannon_entropy` | Information Theory | Shannon information entropy |
-| `hubble_parameter` | Cosmology | Hubble parameter from scale factor |
-| `klein_gordon` | High Energy / String | 1D Klein-Gordon scalar field equation |
+| `continuity_to_schrodinger_madelung` | `continuity_1d` → `schrodinger_free` | Madelung transform: fluid ↔ quantum |
+| `classical_to_diffusion_morph` | `harmonic_oscillator` → `ficks_second_law` | Propeller morph (MIT droplet style) |
+| `yukawa_to_klein_gordon` | `yukawa_potential` → `klein_gordon` | Static solution of massive scalar field |
+| `optics_to_quantum` | `paraxial_helmholtz` → `schrodinger_free` | Paraxial wave ↔ Schrödinger (z↔t analogy) |
+| `chaos_to_information` | `lyapunov_exponent` → `shannon_entropy` | Kolmogorov-Sinai entropy from chaos |
+| `gr_to_cosmology` | `einstein_field_equation` → `friedmann_first` | FLRW ansatz applied to Einstein equations |
+| `thermo_to_information` | `boltzmann_entropy` → `shannon_entropy` | Thermodynamic ↔ information entropy |
+| `dirac_to_schrodinger` | `dirac_1d` → `schrodinger_free` | Non-relativistic limit of Dirac |
+| `vlasov_to_fluid` | `vlasov_1d` → `continuity_1d` | Velocity moments of Vlasov → fluid |
+| `landauer_to_thermo` | `landauer_principle` → `boltzmann_entropy` | Bit erasure ↔ thermodynamic entropy |
+
+---
 
 ## Setup
 
 ### Requirements
-- Python 3.8+
-- SymPy
-- NetworkX
 
-### Installation
 ```bash
 pip install sympy networkx
 ```
 
-## Usage
-
-Run the main playground script to see a demonstration of cross-domain equation mixing:
+### Run the playground
 
 ```bash
 python physics_playground.py
 ```
 
-### Interactive Example
+### Run the graph
 
-You can also use the playground interactively in a Python REPL or Jupyter Notebook:
+```bash
+python graph.py
+```
+
+---
+
+## Usage Examples
 
 ```python
 from physics_playground import PhysicsPlayground
+from graph import build_morphism_graph, EquationRegistry
 
+# --- Registry ---
 playground = PhysicsPlayground()
+print(playground.info("klein_gordon"))
 
-# Get information about a registered equation
-print(playground.info("harmonic_oscillator"))
+# Propeller morph: classical → quantum-diffusion
+morphed = playground.creative_mix("harmonic_oscillator", operation="morph")
 
-# Apply a creative transformation (e.g., MIT Droplet Style morph)
-morphed_eq = playground.creative_mix("harmonic_oscillator", operation="morph")
-print(morphed_eq)
+# Cross-domain algebraic mix
+mixed = playground.registry.mix("continuity_1d", "schrodinger_free", "add")
+
+# --- Graph ---
+registry = EquationRegistry()
+graph    = build_morphism_graph(registry)
+
+# Shortest path between two equations
+path = graph.path("harmonic_oscillator", "klein_gordon")
+print(" → ".join(path))
+
+# All transformation routes (cutoff = 4 hops)
+for p in graph.all_paths("continuity_1d", "schrodinger_free", cutoff=4):
+    print(" → ".join(p))
+
+# Everything reachable from a starting equation
+print(graph.reachable_from("harmonic_oscillator"))
+
+# Equations in a specific domain
+print(graph.domain_cluster(PhysicsDomain.QUANTUM))
 ```
 
-## Architecture Concepts
+---
 
-1. **Symbolic Flexibility**: High freedom in mixing equations.
-2. **Constraint Enforcement**: (Planned) Enforce invariants and dimensional consistency.
-3. **Graph Space**: Move from isolated equations to a navigable phase space of transformations.
+## Planned Extensions
 
-## Future Extensions
-
-- **Action -> Phase Transform**: Map classical mechanics into quantum phase space.
-- **Madelung Transform**: Connect fluid dynamics to quantum mechanics.
-- **Dimensional Consistency Filter**: Prevent invalid domain mixing by checking units.
-- **Geometry Layer**: Project symbolic fields into discretized spatial structures (voxels, point clouds).
+1. **Geometry Layer**: `sympy.Expr` → `lambdify` → NumPy field → voxel / point cloud (the "geometric → binary" bridge).
+2. **Madelung Transform**: Full symbolic implementation connecting `continuity_1d` + `euler_momentum_1d` ↔ `schrodinger_free`.
+3. **Action → Phase**: Map `lagrangian_free_particle` → quantum phase via `ψ = exp(iS/ħ)`.
+4. **Dimensional Consistency Filter**: Attach SI dimensions to symbols; reject or flag invalid mixes.
+5. **Jupyter Frontend**: Interactive sliders for parameters with live LaTeX rendering.
+6. **Graph Embedding**: Embed the equation graph into a continuous vector space; treat morphisms as flows.
