@@ -60,6 +60,15 @@ Proves the **Lorenz-PDE Isomorphism**: the quantum fluid equation and the Lorenz
 Scales the theory up to a "Geometry of Geometries." Simulates the 4D Phase Diagram of Physics, the DeWitt supermetric distance between different universes, entanglement as geometric curvature, and signature transitions as topological holonomies.
 *(Read the plain-language guide: [`Addon_Explainer.md`](Addon_Explainer.md))*
 
+### 5. The Silicon Phase-Space Framework (`connections_sims.py` — 10 sims)
+Bridges the abstract physics machinery to physical silicon computation. Models silicon as a **4-dimensional behavioral manifold** S = (n, d, ℓ, κ), with continuous softmax regime blending, rigorous geometry-to-silicon mapping derived from first principles (density-of-states integrals, winding numbers, spectral power-law fitting, Drude conductivity), feedback closure (binary output modifies the geometry field), and a full closed-loop dynamical system `dS/dt = F(n, d, ℓ, κ)` with trajectory tracking and phase-boundary detection.
+*(Read the plain-language guide: [`Connections_Explainer.md`](Connections_Explainer.md))*
+
+> **Field Link — Computational Bridge Repo:**
+> The engineering pipeline (geometry_to_silicon_rigorous, silicon_to_graph, graph_to_binary, binary_to_geometry, closed_loop_pipeline) is implemented in the companion repository:
+> **[Geometric-to-Binary Computational Bridge / Silicon/Connections.md](https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge/blob/main/Silicon/Connections.md)**
+> This repo provides the physics layer; the Bridge repo provides the silicon compilation layer. The `SiliconState` object is the interface between them.
+
 ---
 
 ## 🧬 Example: Morphing Across Domains
