@@ -1120,6 +1120,20 @@ def closed_loop_trajectory():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Unified runner (matches API of sims.py / workon_sims.py / todo_sims.py /
+# addon_sims.py so run_all_sims.py --module connections_sims works).
+# ─────────────────────────────────────────────────────────────────────────────
+
+def run_all():
+    print(f"\nRunning {len(REGISTRY)} Connections simulations → plots/\n")
+    for name, meta in REGISTRY.items():
+        print(f"[{name}]")
+        print(f"  {meta['title']}")
+        meta["fn"]()
+    print(f"\nDone. {len(REGISTRY)} plots saved to {PLOT_DIR}/")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # CLI
 # ─────────────────────────────────────────────────────────────────────────────
 
