@@ -3,12 +3,14 @@ physics_playground.py
 A symbolic sandbox for mixing, matching, and morphing physics equations.
 Built on SymPy for the "geometric to binary" style experimental repo.
 
-Domains (18 total):
+Domains (20 total):
   Original: Classical Mechanics, Electromagnetism, Quantum, Thermodynamics,
             Fluid Dynamics, Statistical, Relativity
   Extended: General Relativity, Plasma Physics, Optics, Condensed Matter,
             Nuclear Physics, Astrophysics, Nonlinear Dynamics, Acoustics,
             Biophysics, Information Theory, Cosmology, High Energy / String
+  Biology:  Population Dynamics, Neuroscience, Molecular Biology,
+            Ecology & Systems Biology
 """
 
 import sympy as sp
@@ -45,6 +47,11 @@ class PhysicsDomain(Enum):
     INFORMATION_THEORY  = "information_theory"
     COSMOLOGY           = "cosmology"
     HIGH_ENERGY_STRING  = "high_energy_string"
+    # --- Biology sub-domains ---
+    POPULATION_DYNAMICS = "population_dynamics"
+    NEUROSCIENCE        = "neuroscience"
+    MOLECULAR_BIOLOGY   = "molecular_biology"
+    ECOLOGY_SYSTEMS     = "ecology_systems"
     CUSTOM              = "custom"
 
 
@@ -197,6 +204,11 @@ class EquationRegistry:
         self._reg_information_theory()
         self._reg_cosmology()
         self._reg_high_energy_string()
+        # Biology sub-domains
+        self._reg_population_dynamics()
+        self._reg_neuroscience()
+        self._reg_molecular_biology()
+        self._reg_ecology_systems()
 
     # ==========================================================
     # DOMAIN REGISTRATIONS
@@ -993,6 +1005,230 @@ class EquationRegistry:
             latex=r"\beta(g)=\mu\frac{\partial g}{\partial\mu}",
             symbolic_expr=sp.Eq(beta_fn, mu_rg*diff(Function('g')(mu_rg), mu_rg)),
             description="Renormalization group beta function for coupling constant running."
+        ))
+
+
+    # ----------------------------------------------------------
+    # 20. POPULATION DYNAMICS
+    # ----------------------------------------------------------
+    def _reg_population_dynamics(self):
+        t = self.s['t']
+        N = Function('N')(t)
+        r_pop = symbols('r', real=True)      # intrinsic growth rate
+        K_cap = symbols('K', positive=True)  # carrying capacity
+        x_var, y_var = self.s['x'], self.s['y']
+
+        # Logistic growth (continuous)
+        self.register(PhysicsEquation(
+            name="logistic_growth", domain=PhysicsDomain.POPULATION_DYNAMICS,
+            latex=r"\frac{dN}{dt}=rN\left(1-\frac{N}{K}\right)",
+            symbolic_expr=sp.Eq(diff(N, t), r_pop * N * (1 - N/K_cap)),
+            description="Continuous logistic population growth with carrying capacity K."
+        ))
+
+        # Lotka-Volterra predator-prey (prey equation)
+        alpha_lv = symbols('alpha', positive=True)  # prey growth rate
+        beta_lv  = symbols('beta',  positive=True)  # predation rate
+        X_lv = Function('X')(t)  # prey
+        Y_lv = Function('Y')(t)  # predator
+        self.register(PhysicsEquation(
+            name="lotka_volterra_prey", domain=PhysicsDomain.POPULATION_DYNAMICS,
+            latex=r"\frac{dX}{dt}=\alpha X - \beta X Y",
+            symbolic_expr=sp.Eq(diff(X_lv, t), alpha_lv*X_lv - beta_lv*X_lv*Y_lv),
+            description="Lotka-Volterra prey equation: growth minus predation."
+        ))
+        # Lotka-Volterra predator equation
+        delta_lv = symbols('delta', positive=True)  # predator growth from prey
+        gamma_lv = symbols('gamma', positive=True)  # predator death rate
+        self.register(PhysicsEquation(
+            name="lotka_volterra_predator", domain=PhysicsDomain.POPULATION_DYNAMICS,
+            latex=r"\frac{dY}{dt}=\delta X Y - \gamma Y",
+            symbolic_expr=sp.Eq(diff(Y_lv, t), delta_lv*X_lv*Y_lv - gamma_lv*Y_lv),
+            description="Lotka-Volterra predator equation: growth from prey minus death."
+        ))
+        # Replicator equation (evolutionary game theory)
+        f_i = symbols('f_i', real=True)   # fitness of strategy i
+        f_bar = symbols('bar_f', real=True)  # mean population fitness
+        x_i = Function('x_i')(t)            # frequency of strategy i
+        self.register(PhysicsEquation(
+            name="replicator_equation", domain=PhysicsDomain.POPULATION_DYNAMICS,
+            latex=r"\dot{x}_i = x_i(f_i - \bar{f})",
+            symbolic_expr=sp.Eq(diff(x_i, t), x_i*(f_i - f_bar)),
+            description="Replicator equation: evolutionary selection dynamics."
+        ))
+        # Wright-Fisher genetic drift (Fokker-Planck form)
+        p_wf = symbols('p', real=True)   # allele frequency
+        N_e  = symbols('N_e', positive=True)  # effective population size
+        self.register(PhysicsEquation(
+            name="wright_fisher_drift", domain=PhysicsDomain.POPULATION_DYNAMICS,
+            latex=r"\frac{\partial \phi}{\partial t}=\frac{1}{2N_e}\frac{\partial^2}{\partial p^2}[p(1-p)\phi]",
+            symbolic_expr=sp.Eq(
+                diff(Function('phi')(p_wf, t), t),
+                Rational(1, 2) / N_e * diff(p_wf*(1-p_wf)*Function('phi')(p_wf, t), p_wf, 2)),
+            description="Wright-Fisher diffusion: genetic drift as a Fokker-Planck equation."
+        ))
+
+    # ----------------------------------------------------------
+    # 21. NEUROSCIENCE
+    # ----------------------------------------------------------
+    def _reg_neuroscience(self):
+        t = self.s['t']
+        x = self.s['x']
+
+        # FitzHugh-Nagumo (v equation)
+        v_fn = Function('v')(t)   # membrane potential variable
+        w_fn = Function('w')(t)   # recovery variable
+        I_ext = symbols('I_ext', real=True)
+        a_fn, b_fn, tau_fn = symbols('a b tau', real=True)
+        self.register(PhysicsEquation(
+            name="fitzhugh_nagumo_v", domain=PhysicsDomain.NEUROSCIENCE,
+            latex=r"\dot{v}=v-\frac{v^3}{3}-w+I_{ext}",
+            symbolic_expr=sp.Eq(
+                diff(v_fn, t),
+                v_fn - v_fn**3/3 - w_fn + I_ext),
+            description="FitzHugh-Nagumo fast voltage variable (reduced Hodgkin-Huxley)."
+        ))
+        # FitzHugh-Nagumo (w recovery equation)
+        self.register(PhysicsEquation(
+            name="fitzhugh_nagumo_w", domain=PhysicsDomain.NEUROSCIENCE,
+            latex=r"\dot{w}=\frac{1}{\tau}(v+a-bw)",
+            symbolic_expr=sp.Eq(
+                diff(w_fn, t),
+                (1/tau_fn)*(v_fn + a_fn - b_fn*w_fn)),
+            description="FitzHugh-Nagumo slow recovery variable."
+        ))
+        # Cable equation (dendrite)
+        lambda_c = symbols('lambda_c', positive=True)  # space constant
+        tau_m    = symbols('tau_m',    positive=True)  # membrane time constant
+        V_cable  = Function('V')(x, t)
+        self.register(PhysicsEquation(
+            name="cable_equation", domain=PhysicsDomain.NEUROSCIENCE,
+            latex=r"\tau_m\frac{\partial V}{\partial t}=\lambda_c^2\frac{\partial^2 V}{\partial x^2}-V",
+            symbolic_expr=sp.Eq(
+                tau_m * diff(V_cable, t),
+                lambda_c**2 * diff(V_cable, x, 2) - V_cable),
+            description="Cable equation for passive voltage propagation in a dendrite."
+        ))
+        # Wilson-Cowan neural population (excitatory)
+        E_wc = Function('E')(t)   # excitatory activity
+        I_wc = Function('I')(t)   # inhibitory activity
+        tau_E = symbols('tau_E', positive=True)
+        c_EE, c_EI = symbols('c_EE c_EI', real=True)
+        P_ext = symbols('P', real=True)
+        S_fn  = Function('S')  # sigmoid transfer function
+        self.register(PhysicsEquation(
+            name="wilson_cowan_E", domain=PhysicsDomain.NEUROSCIENCE,
+            latex=r"\tau_E\dot{E}=-E+S(c_{EE}E - c_{EI}I + P)",
+            symbolic_expr=sp.Eq(
+                tau_E * diff(E_wc, t),
+                -E_wc + S_fn(c_EE*E_wc - c_EI*I_wc + P_ext)),
+            description="Wilson-Cowan excitatory neural population mean-field equation."
+        ))
+
+    # ----------------------------------------------------------
+    # 22. MOLECULAR BIOLOGY
+    # ----------------------------------------------------------
+    def _reg_molecular_biology(self):
+        # Hill equation (cooperative binding)
+        theta_h = symbols('theta', positive=True)  # fractional occupancy
+        L_conc  = symbols('L',  positive=True)     # ligand concentration
+        K_d     = symbols('K_d', positive=True)    # dissociation constant
+        n_h     = symbols('n',   positive=True)    # Hill coefficient
+        self.register(PhysicsEquation(
+            name="hill_equation", domain=PhysicsDomain.MOLECULAR_BIOLOGY,
+            latex=r"\theta=\frac{[L]^n}{K_d^n+[L]^n}",
+            symbolic_expr=sp.Eq(theta_h, L_conc**n_h / (K_d**n_h + L_conc**n_h)),
+            description="Hill equation for cooperative ligand binding (n=1 → Michaelis-Menten)."
+        ))
+        # Arrhenius rate equation
+        k_rate = symbols('k_rate', positive=True)  # rate constant
+        A_pre  = symbols('A',  positive=True)      # pre-exponential factor
+        E_a    = symbols('E_a', positive=True)     # activation energy
+        R_gas  = symbols('R',   positive=True)     # gas constant
+        T      = self.s['T']
+        self.register(PhysicsEquation(
+            name="arrhenius", domain=PhysicsDomain.MOLECULAR_BIOLOGY,
+            latex=r"k=A e^{-E_a/RT}",
+            symbolic_expr=sp.Eq(k_rate, A_pre * exp(-E_a / (R_gas * T))),
+            description="Arrhenius equation: temperature dependence of reaction rate."
+        ))
+        # Turing reaction-diffusion (activator u)
+        x, t = self.s['x'], self.s['t']
+        u_rd = Function('u')(x, t)   # activator
+        v_rd = Function('v')(x, t)   # inhibitor
+        D_u  = symbols('D_u', positive=True)
+        f_rd = Function('f')(u_rd, v_rd)  # reaction term
+        self.register(PhysicsEquation(
+            name="turing_activator", domain=PhysicsDomain.MOLECULAR_BIOLOGY,
+            latex=r"\frac{\partial u}{\partial t}=D_u\nabla^2 u + f(u,v)",
+            symbolic_expr=sp.Eq(
+                diff(u_rd, t),
+                D_u * diff(u_rd, x, 2) + f_rd),
+            description="Turing reaction-diffusion activator equation for pattern formation."
+        ))
+        # Turing reaction-diffusion (inhibitor v)
+        D_v  = symbols('D_v', positive=True)
+        g_rd = Function('g')(u_rd, v_rd)  # reaction term
+        self.register(PhysicsEquation(
+            name="turing_inhibitor", domain=PhysicsDomain.MOLECULAR_BIOLOGY,
+            latex=r"\frac{\partial v}{\partial t}=D_v\nabla^2 v + g(u,v)",
+            symbolic_expr=sp.Eq(
+                diff(v_rd, t),
+                D_v * diff(v_rd, x, 2) + g_rd),
+            description="Turing reaction-diffusion inhibitor equation for pattern formation."
+        ))
+
+    # ----------------------------------------------------------
+    # 23. ECOLOGY & SYSTEMS BIOLOGY
+    # ----------------------------------------------------------
+    def _reg_ecology_systems(self):
+        t = self.s['t']
+        N = Function('N')(t)
+        r_pop = symbols('r', real=True)
+        K_cap = symbols('K', positive=True)
+
+        # Fisher-KPP traveling wave
+        x = self.s['x']
+        u_kpp = Function('u')(x, t)
+        D_kpp = symbols('D', positive=True)
+        self.register(PhysicsEquation(
+            name="fisher_kpp", domain=PhysicsDomain.ECOLOGY_SYSTEMS,
+            latex=r"\frac{\partial u}{\partial t}=D\frac{\partial^2 u}{\partial x^2}+ru(1-u)",
+            symbolic_expr=sp.Eq(
+                diff(u_kpp, t),
+                D_kpp * diff(u_kpp, x, 2) + r_pop * u_kpp * (1 - u_kpp)),
+            description="Fisher-KPP equation: reaction-diffusion with logistic growth."
+        ))
+        # SIR epidemic model (S equation)
+        S_sir = Function('S')(t)
+        I_sir = Function('I')(t)
+        R_sir = Function('R')(t)
+        beta_sir  = symbols('beta_sir',  positive=True)  # transmission rate
+        gamma_sir = symbols('gamma_sir', positive=True)  # recovery rate
+        self.register(PhysicsEquation(
+            name="sir_susceptible", domain=PhysicsDomain.ECOLOGY_SYSTEMS,
+            latex=r"\frac{dS}{dt}=-\beta SI",
+            symbolic_expr=sp.Eq(diff(S_sir, t), -beta_sir * S_sir * I_sir),
+            description="SIR model: rate of change of susceptible population."
+        ))
+        # SIR epidemic model (I equation)
+        self.register(PhysicsEquation(
+            name="sir_infected", domain=PhysicsDomain.ECOLOGY_SYSTEMS,
+            latex=r"\frac{dI}{dt}=\beta SI - \gamma I",
+            symbolic_expr=sp.Eq(
+                diff(I_sir, t),
+                beta_sir * S_sir * I_sir - gamma_sir * I_sir),
+            description="SIR model: rate of change of infected population."
+        ))
+        # Allometric scaling (Kleiber's law)
+        M_body = symbols('M', positive=True)  # body mass
+        B_met  = symbols('B', positive=True)  # metabolic rate
+        B_0    = symbols('B_0', positive=True)
+        self.register(PhysicsEquation(
+            name="allometric_scaling", domain=PhysicsDomain.ECOLOGY_SYSTEMS,
+            latex=r"B=B_0 M^{3/4}",
+            symbolic_expr=sp.Eq(B_met, B_0 * M_body**Rational(3, 4)),
+            description="Kleiber's allometric scaling law: metabolic rate ∝ M^(3/4)."
         ))
 
 

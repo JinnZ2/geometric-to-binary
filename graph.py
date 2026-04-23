@@ -135,9 +135,62 @@ _DOMAIN_DISTANCE: Dict[Tuple[str, str], int] = {
     ("acoustics", "biophysics"):                     2,
     # --- Biophysics neighbours ---
     ("biophysics", "information_theory"):            2,
+    ("biophysics", "population_dynamics"):           1,
+    ("biophysics", "neuroscience"):                  1,
+    ("biophysics", "molecular_biology"):             1,
+    ("biophysics", "ecology_systems"):               2,
     # --- Information Theory neighbours ---
     ("information_theory", "cosmology"):             3,
     ("information_theory", "high_energy_string"):    3,
+    ("information_theory", "population_dynamics"):   2,
+    ("information_theory", "neuroscience"):          2,
+    ("information_theory", "molecular_biology"):     2,
+    ("information_theory", "ecology_systems"):       3,
+    # --- Population Dynamics neighbours ---
+    ("population_dynamics", "nonlinear_dynamics"):   1,
+    ("population_dynamics", "statistical"):          1,
+    ("population_dynamics", "ecology_systems"):      1,
+    ("population_dynamics", "neuroscience"):         2,
+    ("population_dynamics", "molecular_biology"):    2,
+    ("population_dynamics", "thermodynamics"):       2,
+    ("population_dynamics", "fluid_dynamics"):       2,
+    ("population_dynamics", "information_theory"):   2,
+    ("population_dynamics", "classical_mechanics"):  2,
+    ("population_dynamics", "quantum"):              3,
+    ("population_dynamics", "cosmology"):            3,
+    ("population_dynamics", "high_energy_string"):   3,
+    # --- Neuroscience neighbours ---
+    ("neuroscience", "nonlinear_dynamics"):          1,
+    ("neuroscience", "biophysics"):                  1,
+    ("neuroscience", "molecular_biology"):           1,
+    ("neuroscience", "statistical"):                 2,
+    ("neuroscience", "information_theory"):          2,
+    ("neuroscience", "acoustics"):                   2,
+    ("neuroscience", "electromagnetism"):            2,
+    ("neuroscience", "thermodynamics"):              2,
+    ("neuroscience", "fluid_dynamics"):              2,
+    ("neuroscience", "classical_mechanics"):         2,
+    ("neuroscience", "quantum"):                     3,
+    ("neuroscience", "cosmology"):                   3,
+    # --- Molecular Biology neighbours ---
+    ("molecular_biology", "biophysics"):             1,
+    ("molecular_biology", "statistical"):            1,
+    ("molecular_biology", "thermodynamics"):         1,
+    ("molecular_biology", "condensed_matter"):       2,
+    ("molecular_biology", "information_theory"):     2,
+    ("molecular_biology", "nonlinear_dynamics"):     2,
+    ("molecular_biology", "fluid_dynamics"):         2,
+    ("molecular_biology", "nuclear_physics"):        3,
+    ("molecular_biology", "quantum"):                2,
+    ("molecular_biology", "ecology_systems"):        1,
+    # --- Ecology & Systems Biology neighbours ---
+    ("ecology_systems", "population_dynamics"):      1,
+    ("ecology_systems", "nonlinear_dynamics"):        1,
+    ("ecology_systems", "fluid_dynamics"):           2,
+    ("ecology_systems", "statistical"):              2,
+    ("ecology_systems", "information_theory"):       3,
+    ("ecology_systems", "thermodynamics"):           2,
+    ("ecology_systems", "astrophysics"):             3,
 }
 
 def domain_distance(d1: PhysicsDomain, d2: PhysicsDomain) -> int:
@@ -698,6 +751,148 @@ def build_morphism_graph(registry: EquationRegistry) -> EquationGraph:
       "rg_beta_function", "partition_function",
       "RG flow of coupling constants is governed by the partition function under scale transformations.",
       dim=0.1, con=0.2, inv=["symmetry"])
+
+    # ----------------------------------------------------------
+    # POPULATION DYNAMICS bridges
+    # ----------------------------------------------------------
+    M("logistic_growth_to_logistic_map",
+      "logistic_growth", "logistic_map",
+      "Continuous logistic ODE is the limit of the discrete logistic map as step size → 0.",
+      dim=0.0, con=0.0, inv=["population"])
+
+    M("lotka_volterra_to_lorenz",
+      "lotka_volterra_prey", "lorenz_x",
+      "Lotka-Volterra coupled oscillations share the nonlinear structure of the Lorenz system.",
+      dim=0.1, con=0.1)
+
+    M("replicator_to_boltzmann",
+      "replicator_equation", "boltzmann_factor",
+      "Replicator dynamics selects fitter strategies analogously to Boltzmann selection by energy.",
+      dim=0.2, con=0.2, inv=["probability"])
+
+    M("replicator_to_logistic",
+      "replicator_equation", "logistic_growth",
+      "Single-strategy replicator equation reduces to logistic growth.",
+      dim=0.0, con=0.0, inv=["population"])
+
+    M("wright_fisher_to_fokker_planck",
+      "wright_fisher_drift", "ficks_second_law",
+      "Wright-Fisher genetic drift is a Fokker-Planck diffusion equation in allele-frequency space.",
+      dim=0.1, con=0.1, inv=["probability"])
+
+    M("wright_fisher_to_schrodinger",
+      "wright_fisher_drift", "schrodinger_free",
+      "Formal analogy: WF diffusion in allele-frequency space ↔ quantum diffusion in position space.",
+      dim=0.2, con=0.3)
+
+    M("lotka_volterra_to_fluid",
+      "lotka_volterra_prey", "continuity_1d",
+      "Population flux in LV system mirrors fluid mass continuity (population as density field).",
+      dim=0.2, con=0.2, inv=["population"])
+
+    # ----------------------------------------------------------
+    # NEUROSCIENCE bridges
+    # ----------------------------------------------------------
+    M("fitzhugh_nagumo_to_van_der_pol",
+      "fitzhugh_nagumo_v", "van_der_pol",
+      "FitzHugh-Nagumo is a biophysically motivated variant of the Van der Pol oscillator.",
+      dim=0.0, con=0.0, inv=["frequency"])
+
+    M("fitzhugh_nagumo_to_hodgkin_huxley",
+      "fitzhugh_nagumo_v", "hodgkin_huxley_membrane",
+      "FitzHugh-Nagumo is a two-variable reduction of the full four-variable Hodgkin-Huxley model.",
+      dim=0.0, con=0.0, inv=["voltage"])
+
+    M("cable_to_diffusion",
+      "cable_equation", "ficks_second_law",
+      "Cable equation is a damped diffusion equation; Fick's second law is the undamped limit.",
+      dim=0.0, con=0.0, inv=["flux"])
+
+    M("cable_to_wave",
+      "cable_equation", "acoustic_wave_equation",
+      "Transmission-line / cable equation is structurally analogous to the acoustic wave equation.",
+      dim=0.1, con=0.1, inv=["frequency"])
+
+    M("wilson_cowan_to_statistical",
+      "wilson_cowan_E", "partition_function",
+      "Wilson-Cowan mean-field neural activity is the biological analogue of a statistical partition function.",
+      dim=0.2, con=0.2)
+
+    M("wilson_cowan_to_lotka_volterra",
+      "wilson_cowan_E", "lotka_volterra_prey",
+      "Excitatory-inhibitory neural populations mirror predator-prey oscillatory dynamics.",
+      dim=0.1, con=0.1)
+
+    # ----------------------------------------------------------
+    # MOLECULAR BIOLOGY bridges
+    # ----------------------------------------------------------
+    M("hill_to_fermi_dirac",
+      "hill_equation", "fermi_dirac",
+      "Hill equation (n=1) is mathematically identical to the Fermi-Dirac distribution.",
+      dim=0.1, con=0.0, inv=["probability"])
+
+    M("hill_to_michaelis_menten",
+      "hill_equation", "michaelis_menten",
+      "Michaelis-Menten is the Hill equation with cooperativity n=1.",
+      dim=0.0, con=0.0, inv=["concentration"])
+
+    M("arrhenius_to_boltzmann",
+      "arrhenius", "boltzmann_factor",
+      "Arrhenius rate constant is a Boltzmann factor applied to activation energy.",
+      dim=0.0, con=0.0, inv=["energy"])
+
+    M("arrhenius_to_radioactive_decay",
+      "arrhenius", "radioactive_decay",
+      "Both describe exponential rate processes; radioactive decay is the T-independent limit.",
+      dim=0.1, con=0.1, inv=["rate"])
+
+    M("turing_activator_to_ficks",
+      "turing_activator", "ficks_second_law",
+      "Turing activator equation is Fick's second law plus a nonlinear reaction term.",
+      dim=0.0, con=0.0, inv=["mass"])
+
+    M("turing_to_fisher_kpp",
+      "turing_activator", "fisher_kpp",
+      "Fisher-KPP is a single-species Turing-type reaction-diffusion with logistic reaction.",
+      dim=0.0, con=0.1, inv=["mass"])
+
+    M("turing_inhibitor_to_activator",
+      "turing_inhibitor", "turing_activator",
+      "Inhibitor and activator are coupled; Turing instability requires D_v >> D_u.",
+      dim=0.0, con=0.0, inv=["mass"])
+
+    # ----------------------------------------------------------
+    # ECOLOGY & SYSTEMS BIOLOGY bridges
+    # ----------------------------------------------------------
+    M("fisher_kpp_to_logistic",
+      "fisher_kpp", "logistic_growth",
+      "Spatially uniform Fisher-KPP solution reduces to the logistic ODE.",
+      dim=0.0, con=0.0, inv=["population"])
+
+    M("fisher_kpp_to_diffusion",
+      "fisher_kpp", "ficks_second_law",
+      "Fisher-KPP without the reaction term is pure Fickian diffusion.",
+      dim=0.0, con=0.0, inv=["mass"])
+
+    M("sir_to_lotka_volterra",
+      "sir_infected", "lotka_volterra_prey",
+      "SIR infected equation mirrors Lotka-Volterra prey: both couple two interacting populations.",
+      dim=0.0, con=0.1, inv=["population"])
+
+    M("sir_to_continuity",
+      "sir_susceptible", "continuity_1d",
+      "SIR susceptible loss is a population flux analogous to fluid mass continuity.",
+      dim=0.1, con=0.1, inv=["population"])
+
+    M("allometric_to_rg",
+      "allometric_scaling", "rg_beta_function",
+      "Allometric power laws arise from scale-invariance analogous to RG fixed points.",
+      dim=0.2, con=0.2, inv=["scaling"])
+
+    M("allometric_to_statistical",
+      "allometric_scaling", "boltzmann_factor",
+      "Metabolic scaling can be derived from statistical mechanics of fractal distribution networks.",
+      dim=0.2, con=0.2)
 
     return graph
 

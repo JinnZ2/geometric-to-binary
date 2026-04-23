@@ -1,6 +1,6 @@
 # Geometric to Binary — Physics Playground
 
-A symbolic sandbox for mixing, matching, and morphing physics equations across 19 domains. Built on SymPy and NetworkX, this repository implements the "geometric to binary" vision: a navigable state space where equations are nodes, transformations are weighted edges, and every cross-domain analogy is a traversable path.
+A symbolic sandbox for mixing, matching, and morphing physics equations across 23 domains. Built on SymPy and NetworkX, this repository implements the "geometric to binary" vision: a navigable state space where equations are nodes, transformations are weighted edges, and every cross-domain analogy is a traversable path.
 
 ---
 
@@ -32,7 +32,7 @@ Lower weight = more natural / physically motivated transformation.
 
 ---
 
-## Registry: 73 Equations across 19 Domains
+## Registry: 90 Equations across 23 Domains
 
 | Domain | Equations |
 |---|---|
@@ -55,10 +55,14 @@ Lower weight = more natural / physically motivated transformation.
 | **Information Theory** | `shannon_entropy`, `shannon_capacity`, `landauer_principle`, `kl_divergence` |
 | **Cosmology** | `hubble_parameter`, `friedmann_first`, `dark_energy_eos`, `redshift_scale_factor` |
 | **High Energy / String** | `klein_gordon`, `nambu_goto_action`, `dirac_1d`, `rg_beta_function` |
+| **Population Dynamics** | `logistic_growth`, `lotka_volterra_prey`, `lotka_volterra_predator`, `replicator_equation`, `wright_fisher_drift` |
+| **Neuroscience** | `fitzhugh_nagumo_v`, `fitzhugh_nagumo_w`, `cable_equation`, `wilson_cowan_E` |
+| **Molecular Biology** | `hill_equation`, `arrhenius`, `turing_activator`, `turing_inhibitor` |
+| **Ecology & Systems Biology** | `fisher_kpp`, `sir_susceptible`, `sir_infected`, `allometric_scaling` |
 
 ---
 
-## Graph: 68 Morphism Edges
+## Graph: 94 Morphism Edges
 
 Key cross-domain bridges include:
 
@@ -74,6 +78,14 @@ Key cross-domain bridges include:
 | `dirac_to_schrodinger` | `dirac_1d` → `schrodinger_free` | Non-relativistic limit of Dirac |
 | `vlasov_to_fluid` | `vlasov_1d` → `continuity_1d` | Velocity moments of Vlasov → fluid |
 | `landauer_to_thermo` | `landauer_principle` → `boltzmann_entropy` | Bit erasure ↔ thermodynamic entropy |
+| `hill_to_fermi_dirac` | `hill_equation` → `fermi_dirac` | Hill equation (n=1) is mathematically identical to Fermi-Dirac |
+| `arrhenius_to_boltzmann` | `arrhenius` → `boltzmann_factor` | Reaction rate as a Boltzmann factor over activation energy |
+| `wright_fisher_to_schrodinger` | `wright_fisher_drift` → `schrodinger_free` | Genetic drift diffusion ↔ quantum diffusion |
+| `fitzhugh_nagumo_to_van_der_pol` | `fitzhugh_nagumo_v` → `van_der_pol` | FitzHugh-Nagumo is a biophysical Van der Pol oscillator |
+| `turing_activator_to_ficks` | `turing_activator` → `ficks_second_law` | Turing pattern formation = diffusion + nonlinear reaction |
+| `allometric_to_rg` | `allometric_scaling` → `rg_beta_function` | Power-law metabolism ↔ RG fixed-point scaling |
+| `fisher_kpp_to_schrodinger` | `fisher_kpp` → `ficks_second_law` → `continuity_1d` → `schrodinger_free` | Reaction-diffusion wave → quantum diffusion (3-hop path) |
+| `sir_to_lotka_volterra` | `sir_infected` → `lotka_volterra_prey` | Epidemic dynamics mirror predator-prey coupling |
 
 ---
 
