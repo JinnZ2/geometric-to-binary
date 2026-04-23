@@ -1,0 +1,83 @@
+{
+  "fieldlink": {
+    "version": "1.2",
+    "updated": "2026-04-23T00:00:00Z",
+    "role": ["physics-layer", "equation-registry", "morphism-graph"],
+    "repo": "https://github.com/JinnZ2/geometric-to-binary",
+    "description": "SymPy equation registry (90 equations, 23 domains) and morphism graph (112 edges) that defines the physics regimes consumed by the Computational Bridge.",
+
+    "sources": [
+      {
+        "name": "computational-bridge",
+        "repo": "https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "silicon_compilation_layer",
+        "paths": [
+          "Silicon/Connections.md",
+          "Silicon/CORE_EQUATIONS.md",
+          "Silicon/README.md",
+          "Silicon/SYSTEM_ARCHITECTURE.md",
+          "Bridge.md",
+          "Bridge.py",
+          "physical_coupling_matrix.py",
+          "solver_registry.py",
+          ".fieldlink.json"
+        ],
+        "mounts": [],
+        "exports": [
+          { "local": "physics_playground.py",       "as": "physics_playground.py" },
+          { "local": "graph.py",                    "as": "graph.py" },
+          { "local": "connections_sims.py",         "as": "connections_sims.py" },
+          { "local": "Connections_Explainer.md",    "as": "Connections_Explainer.md" }
+        ],
+        "entities_consumed": [
+          "SILICON.STATE",
+          "SILICON.REGIME_BLEND",
+          "GEOMETRY.FIELD",
+          "BRIDGE.BINARY",
+          "FEEDBACK.CLOSURE"
+        ],
+        "entities_exported": [
+          "REGISTRY.EQUATION",
+          "GRAPH.MORPHISM",
+          "MORPHISM.PATH",
+          "PROPELLER.TRANSFORM",
+          "UNIFIED_ACTION.REGIMES",
+          "LORENZ_PDE.ISOMORPHISM"
+        ],
+        "interface": {
+          "_comment": "The SiliconState object is the binding contract between the two repos. This repo produces it; the Bridge repo consumes it.",
+          "object": "SiliconState",
+          "components": ["n", "d", "ell", "kappa_e", "kappa_o", "kappa_t", "kappa_m"],
+          "spec": "Silicon/Connections.md#the-silicon-state-vector"
+        },
+        "consent": { "license": "MIT", "share_ok": true }
+      }
+    ],
+
+    "layer_map": {
+      "_comment": "Division of responsibility between the two repos.",
+      "this_repo_owns": [
+        "equation_registry",
+        "morphism_graph",
+        "propeller_transform",
+        "symbolic_mixing",
+        "physics_simulations",
+        "silicon_phase_space_model"
+      ],
+      "bridge_repo_owns": [
+        "geometry_to_silicon_rigorous",
+        "silicon_to_graph",
+        "graph_to_binary",
+        "binary_to_geometry",
+        "closed_loop_pipeline",
+        "fabrication_pathway",
+        "octahedral_substrate"
+      ]
+    },
+
+    "offline": true,
+    "consent": { "license": "MIT", "share_ok": true }
+  }
+}

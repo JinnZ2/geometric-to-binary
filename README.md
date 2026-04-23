@@ -35,7 +35,7 @@ python physics_playground.py
 
 **3. Run all simulations:**
 ```bash
-python run_all_sims.py --list    # List all 44 simulations
+python run_all_sims.py --list    # List all 54 simulations
 python run_all_sims.py           # Run everything (saves to plots/)
 ```
 
@@ -43,7 +43,7 @@ python run_all_sims.py           # Run everything (saves to plots/)
 
 ## 🧪 The Simulation Hierarchy
 
-The repo includes 44 numerical simulations that prove the math works. They are split across four conceptual levels:
+The repo includes 54 numerical simulations that prove the math works. They are split across five conceptual levels:
 
 ### 1. Domain Physics (`sims.py` — 26 sims)
 Standard numerical simulations of the 90 registry equations. Covers everything from quantum tunneling and Schwarzschild orbits to the Lotka-Volterra predator-prey dynamics and Turing pattern formation.
@@ -67,7 +67,7 @@ Bridges the abstract physics machinery to physical silicon computation. Models s
 > **Field Link — Computational Bridge Repo:**
 > The engineering pipeline (geometry_to_silicon_rigorous, silicon_to_graph, graph_to_binary, binary_to_geometry, closed_loop_pipeline) is implemented in the companion repository:
 > **[Geometric-to-Binary Computational Bridge / Silicon/Connections.md](https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge/blob/main/Silicon/Connections.md)**
-> This repo provides the physics layer; the Bridge repo provides the silicon compilation layer. The `SiliconState` object is the interface between them.
+> This repo provides the physics layer; the Bridge repo provides the silicon compilation layer. The `SiliconState` object is the interface between them. See [`.fieldlink.json`](.fieldlink.json) for the machine-readable bridge manifest (matches the Bridge repo's `fieldlink` v1.2 schema).
 
 ---
 

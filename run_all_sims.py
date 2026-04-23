@@ -2,12 +2,12 @@
 run_all_sims.py
 Unified entry point for all simulations in the geometric-to-binary repo.
 
-Runs all 44 simulations across the four sim modules and saves every plot
+Runs all 54 simulations across the five sim modules and saves every plot
 to the plots/ directory.
 
 Usage
 -----
-    python run_all_sims.py              # run all 44 simulations
+    python run_all_sims.py              # run all 54 simulations
     python run_all_sims.py --list       # list all available simulations
     python run_all_sims.py --module sims            # run one module
     python run_all_sims.py --sim lorenz             # run one simulation by name
@@ -15,10 +15,12 @@ Usage
 
 Modules
 -------
-    sims           — 26 sims: core physics domains (classical → biology)
-    workon_sims    —  9 sims: Madelung / Ricci flow / Liouville string theory
-    todo_sims      —  4 sims: Lorenz-PDE isomorphism / unified action regimes
-    addon_sims     —  5 sims: 4D phase diagram / DeWitt metric / entanglement
+    sims             — 26 sims: core physics domains (classical → biology)
+    workon_sims      —  9 sims: Madelung / Ricci flow / Liouville string theory
+    todo_sims        —  4 sims: Lorenz-PDE isomorphism / unified action regimes
+    addon_sims       —  5 sims: 4D phase diagram / DeWitt metric / entanglement
+    connections_sims — 10 sims: silicon phase-space framework (field-linked
+                       to Geometric-to-Binary-Computational-Bridge)
 """
 
 import argparse
@@ -29,10 +31,11 @@ import time
 
 # ── Sim modules in conceptual order ──────────────────────────────────────────
 MODULES = [
-    ("sims",        "Core physics domain simulations (26)"),
-    ("workon_sims", "Madelung → Ricci flow → Liouville string theory (9)"),
-    ("todo_sims",   "Lorenz-PDE isomorphism / unified action regimes (4)"),
-    ("addon_sims",  "4D phase diagram / DeWitt metric / entanglement (5)"),
+    ("sims",             "Core physics domain simulations (26)"),
+    ("workon_sims",      "Madelung → Ricci flow → Liouville string theory (9)"),
+    ("todo_sims",        "Lorenz-PDE isomorphism / unified action regimes (4)"),
+    ("addon_sims",       "4D phase diagram / DeWitt metric / entanglement (5)"),
+    ("connections_sims", "Silicon phase-space framework (10)"),
 ]
 
 
