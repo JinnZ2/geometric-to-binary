@@ -5,7 +5,7 @@ Simulations for the Silicon Phase-Space Framework.
 Field link:
   https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge/blob/main/Silicon/Connections.md
 
-Concepts covered (11 simulations):
+Concepts covered (12 simulations):
   Original 6:
     1. silicon_phase_diagram       — 4D state space and attractor basins
     2. phase_transitions           — Band-gap collapse, quantization, decoherence surfaces
@@ -24,10 +24,14 @@ Concepts covered (11 simulations):
    11. bridge_domain_coupling      — Physics-mediated coupling between
                                      Bridge-contract domains (reads
                                      .fieldlink.json#physics_to_bridge_domain_map)
+   12. sensor_activation_paths     — Reality → sensor → physics → bridge:
+                                     which Bridge domains a sensing build
+                                     can actually observe per tier
+                                     (reads sensors_to_physics.json)
 
 Usage
 -----
-    python connections_sims.py              # run all 11
+    python connections_sims.py              # run all 12
     python connections_sims.py --sim continuous_regime_blending
     python connections_sims.py --list
 """
@@ -1304,6 +1308,202 @@ def bridge_domain_coupling():
     isolates = [b for i, b in enumerate(bridge_domains) if diag[i] == 0]
     if isolates:
         print(f"    Bridge domains with NO declared physics backing: {isolates}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sensor activation paths: reality → sensors → physics → bridge domains.
+# Closes the observational direction of the pipeline (the rest of the module
+# handles the theoretical direction: equations → silicon → binary).
+# Hardware drivers, .claims writers, and transmission live in sibling repos:
+# Symbolic-sensor-suite, Noise-as-Information-Sensor, TRDAP, BE2-communication.
+# ─────────────────────────────────────────────────────────────────────────────
+
+EPI_NUMERIC = {"sharp": 1.0, "partial": 0.6, "loose": 0.3}
+
+
+def _load_sensor_map():
+    """Load sensors_to_physics.json. Returns (sensors, tiers) where
+    sensors[name] = {hardware, physics_domains, epi, epi_confidence, tier}
+    and tiers[tier_label] = [sensor_name, ...]."""
+    import json
+    repo = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(repo, "sensors_to_physics.json")) as fh:
+        s = json.load(fh)
+    return s["sensors"], s["tiers"]
+
+
+@sim("sensor_activation_paths",
+     "Sensor Activation Paths — reality → sensor → physics → bridge")
+def sensor_activation_paths():
+    """
+    Tripartite flow showing which Bridge-contract domains a sensing build can
+    *observe* (vs. the bridge_domain_coupling sim, which shows which Bridge
+    domains the physics layer can theoretically *drive*).
+
+    Inputs:
+      sensors_to_physics.json#sensors   sensor → PhysicsDomain
+      .fieldlink.json#physics_to_bridge_domain_map   PhysicsDomain → Bridge
+
+    For each tier (1=minimal, 2=+spectrum, 3=+RF), compute:
+      - which physics domains the tier's sensors light up (weighted by epi)
+      - which bridge domains those physics domains can drive
+      - coverage: % of the 18-domain Bridge contract observable by that tier
+
+    The plot is a Sankey-ish layered flow per tier, plus a coverage bar.
+    """
+    sensors, tiers = _load_sensor_map()
+    pmap, eq_count = _load_physics_to_bridge_map()
+
+    bridge_domains = [b for _, bs in BRIDGE_LAYERS for b in bs]
+
+    def tier_activation(tier_sensors):
+        """Returns (physics_weights, bridge_weights, edges_sp, edges_pb)."""
+        physics_w = {}                               # physics_domain → weight
+        edges_sp  = []                               # (sensor, physics, w)
+        for sname in tier_sensors:
+            s = sensors[sname]
+            w_per = s["epi_confidence"] / max(1, len(s["physics_domains"]))
+            for p in s["physics_domains"]:
+                physics_w[p] = physics_w.get(p, 0.0) + w_per
+                edges_sp.append((sname, p, w_per))
+
+        bridge_w = {b: 0.0 for b in bridge_domains}
+        edges_pb = []
+        for p, w in physics_w.items():
+            if p not in pmap:
+                continue
+            entry = pmap[p]
+            cw = EPI_NUMERIC.get(entry["confidence"], 0.0)
+            for b in entry["bridge_domains"]:
+                contrib = w * cw
+                bridge_w[b] += contrib
+                edges_pb.append((p, b, contrib))
+        return physics_w, bridge_w, edges_sp, edges_pb
+
+    tier_order = ["1_minimal", "2_spectrum", "3_rf"]
+    tier_results = {t: tier_activation(tiers[t]) for t in tier_order}
+
+    # Cumulative tier (each tier adds to previous)
+    cum_sensors = []
+    cum_results = {}
+    for t in tier_order:
+        cum_sensors.extend(tiers[t])
+        cum_results[t] = tier_activation(cum_sensors)
+
+    # ── Plot ────────────────────────────────────────────────────────────────
+    fig = plt.figure(figsize=(17, 12))
+    gs = fig.add_gridspec(2, 3, height_ratios=[3, 1], hspace=0.35, wspace=0.25)
+
+    # Top row: one tripartite flow per cumulative tier
+    for col, t in enumerate(tier_order):
+        ax = fig.add_subplot(gs[0, col])
+        sensors_in_tier = [s for tt in tier_order[: col + 1] for s in tiers[tt]]
+        physics_w, bridge_w, edges_sp, edges_pb = cum_results[t]
+        physics_in = sorted(physics_w.keys())
+
+        # Layout: 3 columns of nodes
+        x_s, x_p, x_b = 0.0, 0.5, 1.0
+
+        def y_positions(items):
+            n = len(items)
+            if n == 0:
+                return {}
+            return {item: 1 - (i + 0.5) / n for i, item in enumerate(items)}
+
+        ys = y_positions(sensors_in_tier)
+        yp = y_positions(physics_in)
+        yb = y_positions(bridge_domains)
+
+        # Draw edges
+        max_sp = max((w for _, _, w in edges_sp), default=1.0)
+        max_pb = max((w for _, _, w in edges_pb), default=1.0)
+        for s, p, w in edges_sp:
+            ax.plot([x_s, x_p], [ys[s], yp[p]],
+                    color="#4a90d9", alpha=0.35 + 0.55 * (w / max_sp),
+                    lw=0.6 + 2.4 * (w / max_sp))
+        for p, b, w in edges_pb:
+            ax.plot([x_p, x_b], [yp[p], yb[b]],
+                    color="#d96a4a", alpha=0.25 + 0.55 * (w / max_pb),
+                    lw=0.6 + 2.4 * (w / max_pb))
+
+        # Draw nodes
+        for s, y in ys.items():
+            ax.scatter(x_s, y, s=80, c="#1f4e79", zorder=3)
+            ax.text(x_s - 0.02, y, s, ha="right", va="center", fontsize=7)
+        for p, y in yp.items():
+            ax.scatter(x_p, y, s=80 + 60 * physics_w[p], c="#2e7d32", zorder=3)
+            ax.text(x_p, y + 0.02, p, ha="center", va="bottom", fontsize=7,
+                    color="#2e7d32")
+        for b, y in yb.items():
+            color = "#b22222" if bridge_w[b] > 0 else "#cccccc"
+            ax.scatter(x_b, y, s=60, c=color, zorder=3)
+            ax.text(x_b + 0.02, y, b, ha="left", va="center", fontsize=7,
+                    color=color if bridge_w[b] > 0 else "#999999")
+
+        ax.set_xlim(-0.25, 1.30)
+        ax.set_ylim(-0.05, 1.08)
+        ax.set_xticks([x_s, x_p, x_b])
+        ax.set_xticklabels(["sensor", "physics domain", "bridge domain"],
+                           fontsize=9)
+        ax.set_yticks([])
+        observed = sum(1 for w in bridge_w.values() if w > 0)
+        ax.set_title(
+            f"Tier ≤{col + 1} cumulative\n"
+            f"{len(sensors_in_tier)} sensors → {len(physics_in)} physics → "
+            f"{observed}/{len(bridge_domains)} bridge domains",
+            fontsize=10,
+        )
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+    # Bottom row: coverage stats spanning all 3 columns
+    ax_cov = fig.add_subplot(gs[1, :])
+    width = 0.27
+    x = np.arange(len(bridge_domains))
+    colors = ["#5b9bd5", "#ed7d31", "#a5a5a5"]
+    for i, t in enumerate(tier_order):
+        _, bridge_w, _, _ = cum_results[t]
+        vals = [bridge_w[b] for b in bridge_domains]
+        ax_cov.bar(x + (i - 1) * width, vals, width,
+                   label=f"≤Tier {i + 1}", color=colors[i], edgecolor="k", lw=0.3)
+    ax_cov.set_xticks(x)
+    ax_cov.set_xticklabels(bridge_domains, rotation=55, ha="right", fontsize=8)
+    ax_cov.set_ylabel("activation weight\n(Σ epi_conf × physics_conf)")
+    ax_cov.set_title(
+        "Bridge-domain observability per tier — what a build can actually see",
+        fontsize=10,
+    )
+    ax_cov.legend(fontsize=9, loc="upper right")
+    ax_cov.grid(axis="y", alpha=0.3)
+
+    # Layer dividers on coverage bar
+    cum_x, layer_labels = -0.5, []
+    for name, bs in BRIDGE_LAYERS:
+        cum_x += len(bs)
+        layer_labels.append((name, cum_x - len(bs) / 2 + 0.5))
+        ax_cov.axvline(cum_x, color="grey", lw=0.5, ls="--", alpha=0.5)
+    for name, xc in layer_labels:
+        ax_cov.text(xc - 0.5, ax_cov.get_ylim()[1] * 1.02, name,
+                    ha="center", va="bottom", fontsize=8,
+                    color="#555", fontstyle="italic")
+
+    fig.suptitle(
+        "Sensor Activation Paths — observational chain through the field-link\n"
+        "Inputs: sensors_to_physics.json (sensor→physics)  +  "
+        ".fieldlink.json#physics_to_bridge_domain_map (physics→bridge)",
+        fontsize=12, y=0.995,
+    )
+
+    savefig("sensor_activation_paths")
+
+    # Printed summary
+    print("    Tier coverage of Bridge contract domains:")
+    for i, t in enumerate(tier_order):
+        _, bridge_w, _, _ = cum_results[t]
+        observed = [b for b, w in bridge_w.items() if w > 0]
+        unobserved = [b for b, w in bridge_w.items() if w == 0]
+        print(f"      ≤Tier {i + 1}: {len(observed)}/{len(bridge_domains)} "
+              f"observed; missing: {unobserved}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
