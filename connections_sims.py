@@ -5,7 +5,7 @@ Simulations for the Silicon Phase-Space Framework.
 Field link:
   https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge/blob/main/Silicon/Connections.md
 
-Concepts covered (10 simulations):
+Concepts covered (11 simulations):
   Original 6:
     1. silicon_phase_diagram       — 4D state space and attractor basins
     2. phase_transitions           — Band-gap collapse, quantization, decoherence surfaces
@@ -14,15 +14,20 @@ Concepts covered (10 simulations):
     5. geometry_to_binary_pipeline — Full pipeline demo
     6. basin_stability             — Stability margins, noise, failure modes
 
-  New (from Computational Bridge):
+  From Computational Bridge (silicon_to_binary):
     7. continuous_regime_blending  — Softmax regime weights vs hard thresholds
     8. rigorous_field_mapping      — Physical derivation of S from geometry field
     9. feedback_closure            — Binary → geometry feedback loop (4 modes)
    10. closed_loop_trajectory      — Full iterative dS/dt dynamical system
 
+  Field-link vector space:
+   11. bridge_domain_coupling      — Physics-mediated coupling between
+                                     Bridge-contract domains (reads
+                                     .fieldlink.json#physics_to_bridge_domain_map)
+
 Usage
 -----
-    python connections_sims.py              # run all 10
+    python connections_sims.py              # run all 11
     python connections_sims.py --sim continuous_regime_blending
     python connections_sims.py --list
 """
@@ -1117,6 +1122,188 @@ def closed_loop_trajectory():
 
     plt.tight_layout()
     savefig("closed_loop_trajectory")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Field-link visualization: bridge-domain coupling mediated by shared physics
+# (reads .fieldlink.json produced by this repo; does NOT require network).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Bridge-domain layer ordering from bridge_contract_manifest.json
+# (https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge).
+BRIDGE_LAYERS = [
+    ("physical",    ["sound", "electric", "gravity", "magnetic", "light",
+                     "pressure", "thermal", "wave", "chemical", "biomachine"]),
+    ("contextual",  ["community", "resilience", "coop"]),
+    ("topological", ["cyclic", "vortex", "geometric_fiber"]),
+    ("cognitive",   ["consciousness", "emotion"]),
+]
+
+CONF_WEIGHT = {"sharp": 1.0, "partial": 0.6, "loose": 0.3}
+
+
+def _load_physics_to_bridge_map():
+    """Load physics_to_bridge_domain_map from .fieldlink.json. Returns
+    (pmap, physics_count) where pmap[physics] = {bridge_domains, confidence}
+    and physics_count[physics] = number of equations in that domain."""
+    import json
+    from physics_playground import EquationRegistry
+
+    repo = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(repo, ".fieldlink.json")) as fh:
+        fl = json.load(fh)
+    pmap = {
+        k: v for k, v in fl["fieldlink"]["physics_to_bridge_domain_map"].items()
+        if not k.startswith("_")
+    }
+
+    r = EquationRegistry(); r._register_all()
+    counts = {}
+    for eq in r._equations.values():
+        counts[eq.domain.value] = counts.get(eq.domain.value, 0) + 1
+    return pmap, counts
+
+
+@sim("bridge_domain_coupling",
+     "Bridge-Domain Coupling — vector-space view of shared physics substrate")
+def bridge_domain_coupling():
+    """
+    Vector-space view of the Bridge repo's 18-domain contract
+    (bridge_contract_manifest.json) as seen from this repo's physics layer.
+
+    Each physics domain is a row in an incidence matrix M ∈ ℝ^{|P|×|B|};
+    each bridge domain is a column. Entries are
+        M[p, b] = confidence_weight(p, b) × equation_count(p)
+    with confidence ∈ {sharp=1.0, partial=0.6, loose=0.3} from
+    .fieldlink.json#physics_to_bridge_domain_map.
+
+    The coupling matrix C = MᵀM then reveals:
+      diagonal  — total physics "mass" backing each bridge domain
+      off-diag  — physics substrate shared between two bridge domains
+                  (i.e. how much the same equations can power both)
+
+    This is the physics-side complement to the Bridge repo's
+    physical_coupling_matrix.py: that one couples domains via silicon
+    geometry; this one couples them via theoretical substrate.
+    """
+    pmap, eq_count = _load_physics_to_bridge_map()
+
+    physics_domains = sorted(pmap.keys())
+    bridge_domains  = [b for _, bs in BRIDGE_LAYERS for b in bs]
+
+    # Build incidence M (|P| × |B|)
+    M = np.zeros((len(physics_domains), len(bridge_domains)))
+    for i, p in enumerate(physics_domains):
+        entry = pmap[p]
+        w = CONF_WEIGHT[entry["confidence"]] * eq_count.get(p, 0)
+        for b in entry["bridge_domains"]:
+            j = bridge_domains.index(b)
+            M[i, j] = w
+
+    # Coupling matrix C (|B| × |B|)
+    C = M.T @ M
+
+    # Off-diagonal pairs ranked by shared physics mass
+    pairs = []
+    for i in range(len(bridge_domains)):
+        for j in range(i + 1, len(bridge_domains)):
+            if C[i, j] > 0:
+                pairs.append((C[i, j], bridge_domains[i], bridge_domains[j]))
+    pairs.sort(reverse=True)
+
+    # ── Plot ────────────────────────────────────────────────────────────────
+    fig = plt.figure(figsize=(16, 14))
+    gs = fig.add_gridspec(
+        2, 2,
+        width_ratios=[4, 1.1],
+        height_ratios=[len(physics_domains), len(bridge_domains)],
+        hspace=0.35, wspace=0.08,
+    )
+
+    # Layer block boundaries along the bridge axis
+    layer_edges, x = [], 0
+    for name, bs in BRIDGE_LAYERS:
+        layer_edges.append((name, x, x + len(bs)))
+        x += len(bs)
+
+    def _draw_layer_dividers(ax, orient="x"):
+        for _, start, end in layer_edges[:-1]:
+            if orient == "x":
+                ax.axvline(end - 0.5, color="white", lw=1.5)
+            else:
+                ax.axhline(end - 0.5, color="white", lw=1.5)
+
+    def _draw_layer_labels(ax):
+        for name, start, end in layer_edges:
+            ax.text((start + end - 1) / 2, -2.2, name,
+                    ha="center", va="bottom", fontsize=9,
+                    color="#555", fontstyle="italic")
+
+    # Panel A: Incidence M — physics × bridge
+    axA = fig.add_subplot(gs[0, :])
+    imA = axA.imshow(M, aspect="auto", cmap="viridis")
+    axA.set_yticks(range(len(physics_domains)))
+    axA.set_yticklabels(physics_domains, fontsize=9)
+    axA.set_xticks(range(len(bridge_domains)))
+    axA.set_xticklabels(bridge_domains, rotation=55, ha="right", fontsize=9)
+    axA.set_title(
+        "Incidence M[p, b] — physics domain × bridge domain  "
+        "(weight = confidence × equation count)",
+        fontsize=11,
+    )
+    _draw_layer_dividers(axA, "x")
+    _draw_layer_labels(axA)
+    fig.colorbar(imA, ax=axA, fraction=0.015, pad=0.01, label="weight")
+
+    # Panel B: Coupling C — bridge × bridge
+    axB = fig.add_subplot(gs[1, 0])
+    # log-ish scaling for legibility without hiding zeros
+    Cplot = np.log1p(C)
+    imB = axB.imshow(Cplot, aspect="equal", cmap="magma")
+    axB.set_xticks(range(len(bridge_domains)))
+    axB.set_xticklabels(bridge_domains, rotation=55, ha="right", fontsize=9)
+    axB.set_yticks(range(len(bridge_domains)))
+    axB.set_yticklabels(bridge_domains, fontsize=9)
+    axB.set_title(
+        "Coupling C = MᵀM — bridge-domain pairs sharing physics substrate\n"
+        "(log1p scale; diagonal = total physics mass)",
+        fontsize=11,
+    )
+    _draw_layer_dividers(axB, "x")
+    _draw_layer_dividers(axB, "y")
+    fig.colorbar(imB, ax=axB, fraction=0.04, pad=0.02, label="log1p(coupling)")
+
+    # Panel C: diagonal bar — physics mass per bridge
+    axC = fig.add_subplot(gs[1, 1])
+    diag = np.diag(C)
+    y = np.arange(len(bridge_domains))
+    axC.barh(y, diag, color="steelblue", edgecolor="k", lw=0.3)
+    axC.set_yticks(y)
+    axC.set_yticklabels([])
+    axC.invert_yaxis()
+    axC.set_title("Physics mass\n(diag C)", fontsize=10)
+    axC.set_xlabel("Σ (conf × #eqs)²", fontsize=9)
+    axC.grid(axis="x", alpha=0.3)
+
+    fig.suptitle(
+        "Bridge-Domain Coupling Through Shared Physics Substrate\n"
+        "Input: .fieldlink.json#physics_to_bridge_domain_map  ·  "
+        f"Bridge contract: bridge_contract_manifest.json  ·  "
+        f"|P|={len(physics_domains)} physics domains, "
+        f"|B|={len(bridge_domains)} bridge domains",
+        fontsize=12, y=0.995,
+    )
+
+    savefig("bridge_domain_coupling")
+
+    # Printed top-N summary (stdout only; not in the plot)
+    top_n = min(10, len(pairs))
+    print(f"    Top {top_n} bridge-domain pairs by shared physics mass:")
+    for w, a, b in pairs[:top_n]:
+        print(f"      {a:16s} ↔ {b:16s}  coupling = {w:7.2f}")
+    isolates = [b for i, b in enumerate(bridge_domains) if diag[i] == 0]
+    if isolates:
+        print(f"    Bridge domains with NO declared physics backing: {isolates}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -14,14 +14,21 @@
         "direction": "bidirectional",
         "relation": "silicon_compilation_layer",
         "paths": [
+          "bridge_contract_manifest.json",
+          "cross_repo_bridge_contract.py",
+          "validate_bridge_contract.py",
+          "solver_registry.py",
+          "physical_coupling_matrix.py",
+          "Bridge.md",
+          "Bridge.py",
           "Silicon/Connections.md",
           "Silicon/CORE_EQUATIONS.md",
           "Silicon/README.md",
           "Silicon/SYSTEM_ARCHITECTURE.md",
-          "Bridge.md",
-          "Bridge.py",
-          "physical_coupling_matrix.py",
-          "solver_registry.py",
+          "Silicon/core/bridges/__init__.py",
+          "Silicon/core/bridges/domain_bridge_catalog.py",
+          "Silicon/core/bridges/adapters.py",
+          "Silicon/core/bridges/hardware_modules.py",
           ".fieldlink.json"
         ],
         "mounts": [],
@@ -36,7 +43,8 @@
           "SILICON.REGIME_BLEND",
           "GEOMETRY.FIELD",
           "BRIDGE.BINARY",
-          "FEEDBACK.CLOSURE"
+          "FEEDBACK.CLOSURE",
+          "BRIDGE.CONTRACT_MANIFEST"
         ],
         "entities_exported": [
           "REGISTRY.EQUATION",
@@ -51,6 +59,16 @@
           "object": "SiliconState",
           "components": ["n", "d", "ell", "kappa_e", "kappa_o", "kappa_t", "kappa_m"],
           "spec": "Silicon/Connections.md#the-silicon-state-vector"
+        },
+        "canonical_entry_points": {
+          "_comment": "Stable cross-repo surfaces on the Bridge side (from cross_repo_entry_points_report.md). Imports/refs should terminate at these, not at older files.",
+          "bridge_contract_manifest": "bridge_contract_manifest.json",
+          "bridge_contract_api":      "cross_repo_bridge_contract.py",
+          "bridge_contract_validator":"validate_bridge_contract.py",
+          "solver_registry":          "solver_registry.py",
+          "silicon_bridge_package":   "Silicon/core/bridges/__init__.py",
+          "domain_bridge_catalog":    "Silicon/core/bridges/domain_bridge_catalog.py",
+          "hardware_module_chooser":  "Silicon/core/bridges/hardware_modules.py"
         },
         "consent": { "license": "MIT", "share_ok": true }
       }
@@ -73,8 +91,36 @@
         "binary_to_geometry",
         "closed_loop_pipeline",
         "fabrication_pathway",
-        "octahedral_substrate"
+        "octahedral_substrate",
+        "bridge_domain_contract"
       ]
+    },
+
+    "physics_to_bridge_domain_map": {
+      "_comment": "DRAFT — human review requested. Maps this repo's PhysicsDomain enum values to the Bridge's 19 bridge_domains (bridge_contract_manifest.json). Confidence: 'sharp' = direct physical correspondence, equations of this domain are the natural source for that bridge encoder; 'partial' = overlaps one aspect of the bridge domain; 'loose' = conceptual alignment only, owner should confirm or reject. 'bridge_domains' entries are names from bridge_contract_manifest.json. Edit freely — this file is the physics layer's declaration of what it can supply to the Bridge.",
+      "acoustics":           { "bridge_domains": ["sound"],                                "confidence": "sharp"   },
+      "electromagnetism":    { "bridge_domains": ["electric", "magnetic", "light"],        "confidence": "sharp"   },
+      "optics":              { "bridge_domains": ["light", "wave"],                        "confidence": "sharp"   },
+      "fluid_dynamics":      { "bridge_domains": ["pressure", "wave"],                     "confidence": "sharp"   },
+      "thermodynamics":      { "bridge_domains": ["thermal"],                              "confidence": "sharp"   },
+      "statistical":         { "bridge_domains": ["thermal"],                              "confidence": "partial" },
+      "general_relativity":  { "bridge_domains": ["gravity"],                              "confidence": "sharp"   },
+      "astrophysics":        { "bridge_domains": ["gravity"],                              "confidence": "sharp"   },
+      "cosmology":           { "bridge_domains": ["gravity"],                              "confidence": "sharp"   },
+      "classical_mechanics": { "bridge_domains": ["wave", "gravity", "pressure"],          "confidence": "partial" },
+      "relativity":          { "bridge_domains": ["wave", "light"],                        "confidence": "partial" },
+      "plasma_physics":      { "bridge_domains": ["electric", "magnetic", "thermal"],      "confidence": "sharp"   },
+      "condensed_matter":    { "bridge_domains": ["electric", "magnetic", "geometric_fiber"], "confidence": "partial" },
+      "nuclear_physics":     { "bridge_domains": ["chemical"],                             "confidence": "loose"   },
+      "high_energy_string":  { "bridge_domains": ["geometric_fiber"],                      "confidence": "loose"   },
+      "quantum":             { "bridge_domains": ["wave", "geometric_fiber"],              "confidence": "partial" },
+      "nonlinear_dynamics":  { "bridge_domains": ["cyclic", "vortex"],                     "confidence": "sharp"   },
+      "biophysics":          { "bridge_domains": ["chemical", "biomachine"],               "confidence": "partial" },
+      "molecular_biology":   { "bridge_domains": ["chemical"],                             "confidence": "sharp"   },
+      "population_dynamics": { "bridge_domains": ["community", "resilience", "coop"],      "confidence": "partial" },
+      "ecology_systems":     { "bridge_domains": ["resilience", "coop"],                   "confidence": "partial" },
+      "neuroscience":        { "bridge_domains": ["consciousness", "emotion"],             "confidence": "loose"   },
+      "information_theory":  { "bridge_domains": ["cyclic", "geometric_fiber"],            "confidence": "loose"   }
     },
 
     "offline": true,

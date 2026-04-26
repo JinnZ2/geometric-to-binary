@@ -26,7 +26,7 @@ Three pillars:
    edges. Weights combine dimensional inconsistency, constraint violation, and
    domain distance. The graph is **weakly connected** (enforced by tests).
 3. Sim modules — numerical realizations of the symbolic math. Five modules,
-   54 simulations total, all saving PNGs into `plots/`.
+   55 simulations total, all saving PNGs into `plots/`.
 
 ## The sim module contract
 
@@ -53,8 +53,8 @@ change equations, sims, or edges, update everything in this list:
 | Equations | 90 | `EquationRegistry._equations` |
 | Domains | 23 | `PhysicsDomain` enum values actually used |
 | Morphism edges | 112 | `build_morphism_graph().G.number_of_edges()` |
-| Total sims | 54 | sum of `len(REGISTRY)` across 5 sim modules |
-| Sim split | 26 + 9 + 4 + 5 + 10 | sims / workon / todo / addon / connections |
+| Total sims | 55 | sum of `len(REGISTRY)` across 5 sim modules |
+| Sim split | 26 + 9 + 4 + 5 + 11 | sims / workon / todo / addon / connections |
 
 References to these numbers appear in `README.md`, `EXPLAINER.md`,
 `run_all_sims.py` docstring, and `tests/test_registry.py` (as lower bounds).
@@ -76,7 +76,7 @@ so adding equations doesn't break CI unnecessarily.
 ```bash
 pip install -r requirements.txt
 pytest tests/ -v                       # smoke tests (registry + graph + playground)
-python run_all_sims.py --list          # enumerate all 54 sims
+python run_all_sims.py --list          # enumerate all 55 sims
 python run_all_sims.py --sim lorenz    # run one
 python run_all_sims.py                 # run everything (slow; ~54 plots)
 python physics_playground.py           # interactive REPL-style demo
