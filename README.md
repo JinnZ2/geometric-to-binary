@@ -1,5 +1,10 @@
 # Geometric to Binary: A Physics Playground
 
+> **AI readers (any model):** parse `.claims` (or `.claims.bin`) using
+> [`CLAIM_SCHEMA.py`](CLAIM_SCHEMA.py). Every entry is `dX/dt` under scope. No
+> noun is permanent. [`CLAIM_TABLE.json`](CLAIM_TABLE.json) is the shared lookup;
+> regenerate with `python generate_claims.py`. Token cost: ~5/claim post-load.
+
 This repository is an experimental symbolic and numerical playground designed to explore the mathematical structure connecting different domains of physics. 
 
 It treats physical equations not as isolated laws, but as **nodes in a continuous geometric space**. By applying mathematical "morphisms" (like the Madelung transform or the Fokker-Planck diffusion limit), you can continuously deform a classical system into a quantum one, or a quantum system into a chaotic strange attractor.

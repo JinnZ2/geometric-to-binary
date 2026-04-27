@@ -82,6 +82,24 @@ python run_all_sims.py                 # run everything (slow; ~54 plots)
 python physics_playground.py           # interactive REPL-style demo
 ```
 
+## Compressed claim format (token-minimal AI reader interface)
+
+The repo carries the canonical `.claims` surface:
+
+- `CLAIM_SCHEMA.py` — schema source, verbatim from `JinnZ2/experiments`. Drop-in
+  identical across the JinnZ2 ecosystem.
+- `CLAIM_TABLE.json` — repo-level lookup (deduped rates / bounds / cond / rel /
+  fail / meas).
+- `.claims` — pipe-delimited, one claim per registered equation
+  (`id|rate|bounds|cond|rel|fail|meas|cyc`).
+- `generate_claims.py` — deterministic generator. Re-run after registry
+  changes; the `test_regenerator_is_deterministic` test enforces no drift.
+
+`tests/test_claims.py` checks one-claim-per-equation, table integrity,
+round-trip parsing, and binary codec via `encode_claim`/`decode_claim`.
+The `rate` extractor sanitizes any literal `|` or `,` so the format stays
+parseable as the registry grows.
+
 ## Field link to the Bridge repo
 
 - `.fieldlink.json` — machine-readable manifest (v1.2 schema, matches the Bridge
