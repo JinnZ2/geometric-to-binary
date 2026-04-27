@@ -1,5 +1,10 @@
 # Geometric to Binary: A Physics Playground
 
+> **AI readers (any model):** parse `.claims` (or `.claims.bin`) using
+> [`CLAIM_SCHEMA.py`](CLAIM_SCHEMA.py). Every entry is `dX/dt` under scope. No
+> noun is permanent. [`CLAIM_TABLE.json`](CLAIM_TABLE.json) is the shared lookup;
+> regenerate with `python generate_claims.py`. Token cost: ~5/claim post-load.
+
 This repository is an experimental symbolic and numerical playground designed to explore the mathematical structure connecting different domains of physics. 
 
 It treats physical equations not as isolated laws, but as **nodes in a continuous geometric space**. By applying mathematical "morphisms" (like the Madelung transform or the Fokker-Planck diffusion limit), you can continuously deform a classical system into a quantum one, or a quantum system into a chaotic strange attractor.
@@ -35,7 +40,7 @@ python physics_playground.py
 
 **3. Run all simulations:**
 ```bash
-python run_all_sims.py --list    # List all 55 simulations
+python run_all_sims.py --list    # List all 56 simulations
 python run_all_sims.py           # Run everything (saves to plots/)
 ```
 
@@ -43,7 +48,7 @@ python run_all_sims.py           # Run everything (saves to plots/)
 
 ## 🧪 The Simulation Hierarchy
 
-The repo includes 55 numerical simulations that prove the math works. They are split across five conceptual levels:
+The repo includes 56 numerical simulations that prove the math works. They are split across five conceptual levels:
 
 ### 1. Domain Physics (`sims.py` — 26 sims)
 Standard numerical simulations of the 90 registry equations. Covers everything from quantum tunneling and Schwarzschild orbits to the Lotka-Volterra predator-prey dynamics and Turing pattern formation.
@@ -60,8 +65,8 @@ Proves the **Lorenz-PDE Isomorphism**: the quantum fluid equation and the Lorenz
 Scales the theory up to a "Geometry of Geometries." Simulates the 4D Phase Diagram of Physics, the DeWitt supermetric distance between different universes, entanglement as geometric curvature, and signature transitions as topological holonomies.
 *(Read the plain-language guide: [`Addon_Explainer.md`](Addon_Explainer.md))*
 
-### 5. The Silicon Phase-Space Framework (`connections_sims.py` — 11 sims)
-Bridges the abstract physics machinery to physical silicon computation. Models silicon as a **4-dimensional behavioral manifold** S = (n, d, ℓ, κ), with continuous softmax regime blending, rigorous geometry-to-silicon mapping derived from first principles (density-of-states integrals, winding numbers, spectral power-law fitting, Drude conductivity), feedback closure (binary output modifies the geometry field), and a full closed-loop dynamical system `dS/dt = F(n, d, ℓ, κ)` with trajectory tracking and phase-boundary detection. Also includes `bridge_domain_coupling` — a vector-space view of which Bridge-contract domains share physics substrate, computed as `C = MᵀM` from `.fieldlink.json`.
+### 5. The Silicon Phase-Space Framework (`connections_sims.py` — 12 sims)
+Bridges the abstract physics machinery to physical silicon computation. Models silicon as a **4-dimensional behavioral manifold** S = (n, d, ℓ, κ), with continuous softmax regime blending, rigorous geometry-to-silicon mapping derived from first principles (density-of-states integrals, winding numbers, spectral power-law fitting, Drude conductivity), feedback closure (binary output modifies the geometry field), and a full closed-loop dynamical system `dS/dt = F(n, d, ℓ, κ)` with trajectory tracking and phase-boundary detection. Also includes `bridge_domain_coupling` — a vector-space view of which Bridge-contract domains share physics substrate, computed as `C = MᵀM` from `.fieldlink.json` — and `sensor_activation_paths`, which closes the observational direction: given a sensing build (Tier 1/2/3 from `sensors_to_physics.json`), it computes which Bridge-contract domains can actually be **observed** as opposed to driven theoretically.
 *(Read the plain-language guide: [`Connections_Explainer.md`](Connections_Explainer.md))*
 
 > **Field Link — Computational Bridge Repo:**

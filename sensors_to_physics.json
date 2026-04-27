@@ -1,0 +1,95 @@
+{
+  "schema_version": "0.1",
+  "_comment": "Sensor → PhysicsDomain mapping for the geometric-to-binary repo. Each sensor declares which PhysicsDomain values its readings activate, plus an epistemic tag (epi) and confidence. This is the physics-side schema only. Drivers live in JinnZ2/Symbolic-sensor-suite. The .claims/Primitive format is owned elsewhere when canonized — this repo just declares which physics domains a sensor reading lights up so the morphism graph and physics_to_bridge_domain_map can route the observation downstream. Tier breakdown follows the sensing-stack proposal (tier 1 = solar+phone-minimal, tier 2 = adds spectrum, tier 3 = adds RF).",
+
+  "tiers": {
+    "1_minimal":  ["soil_moisture", "temp_ambient", "temp_soil_infrared", "motion_acoustic"],
+    "2_spectrum": ["light_spectrum", "atmosphere", "uv_sensor"],
+    "3_rf":       ["rf_spectrum_scanner"]
+  },
+
+  "epi_taxonomy": {
+    "_comment": "Mirrors the precedent set by JinnZ2/JinnZ2/Random-Thought-Ledger (provenance.confidence) and the user-proposed sensing framework. 'measured' = direct physical reading; 'measured_inferred_id' = direct reading whose meaning requires species/context inference; 'measured_needs_interpretation' = direct reading with no ground-truth label without further analysis.",
+    "measured":                        "Direct physical reading of a measurable physical quantity.",
+    "measured_inferred_id":            "Reading is direct but identification of subject (species, individual) requires inference.",
+    "measured_needs_interpretation":   "Reading is direct but spectral/contextual interpretation is needed before the value carries meaning."
+  },
+
+  "sensors": {
+    "soil_moisture": {
+      "hardware":        "capacitive probe (1-wire or analog-to-USB)",
+      "physics_domains": ["fluid_dynamics", "biophysics"],
+      "log_fields":      ["timestamp", "raw_ohms", "inferred_water_content"],
+      "epi":             "measured",
+      "epi_confidence":  0.85,
+      "tier":            1
+    },
+    "temp_ambient": {
+      "hardware":        "DS18B20 (-55°C to +125°C)",
+      "physics_domains": ["thermodynamics"],
+      "log_fields":      ["timestamp", "location", "celsius"],
+      "epi":             "measured",
+      "epi_confidence":  0.95,
+      "tier":            1
+    },
+    "temp_soil_infrared": {
+      "hardware":        "MLX90614 IR (non-contact)",
+      "physics_domains": ["thermodynamics", "optics"],
+      "log_fields":      ["timestamp", "target_temp", "ambient_ref"],
+      "epi":             "measured",
+      "epi_confidence":  0.90,
+      "tier":            1
+    },
+    "motion_acoustic": {
+      "hardware":        "PIR motion + USB microphone",
+      "physics_domains": ["acoustics", "ecology_systems", "neuroscience"],
+      "log_fields":      ["timestamp", "motion_event", "audio_file_hash"],
+      "epi":             "measured_inferred_id",
+      "epi_confidence":  0.75,
+      "tier":            1
+    },
+
+    "light_spectrum": {
+      "hardware":        "AS7341 (9-channel VIS+NIR)",
+      "physics_domains": ["optics", "molecular_biology"],
+      "log_fields":      ["timestamp", "wavelength_channels", "inferred_phenophase"],
+      "epi":             "measured",
+      "epi_confidence":  0.80,
+      "tier":            2
+    },
+    "atmosphere": {
+      "hardware":        "BME680 (temp/humidity/pressure/gas)",
+      "physics_domains": ["thermodynamics", "fluid_dynamics", "molecular_biology"],
+      "log_fields":      ["timestamp", "temperature", "humidity", "pressure", "gas_resistance"],
+      "epi":             "measured",
+      "epi_confidence":  0.88,
+      "tier":            2
+    },
+    "uv_sensor": {
+      "hardware":        "VEML6075 (UVA+UVB)",
+      "physics_domains": ["optics", "biophysics"],
+      "log_fields":      ["timestamp", "uva", "uvb", "uv_index"],
+      "epi":             "measured",
+      "epi_confidence":  0.70,
+      "tier":            2
+    },
+
+    "rf_spectrum_scanner": {
+      "hardware":        "RTL-SDR dongle (24 MHz – 1766 MHz)",
+      "physics_domains": ["electromagnetism", "information_theory"],
+      "log_fields":      ["timestamp", "frequency_ranges", "power_levels"],
+      "epi":             "measured_needs_interpretation",
+      "epi_confidence":  0.65,
+      "tier":            3
+    }
+  },
+
+  "_field_link": {
+    "_comment": "How this file plugs into the rest of the stack. The chain is: sensor → physics_domains → (.fieldlink.json#physics_to_bridge_domain_map) → bridge_domains → Bridge encoder. Drivers/transmission/.claims live in other repos.",
+    "drivers_repo":         "https://github.com/JinnZ2/Symbolic-sensor-suite",
+    "rf_interpretation":    "https://github.com/JinnZ2/Noise-as-Information-Sensor",
+    "transmission_layer":   ["https://github.com/JinnZ2/TRDAP", "https://github.com/JinnZ2/BE2-communication"],
+    "bridge_contract":      "https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge/blob/main/bridge_contract_manifest.json",
+    "consumed_by_sim":      "connections_sims.py:sensor_activation_paths"
+  }
+}
