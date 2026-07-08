@@ -2,7 +2,7 @@
 
 A unified integration layer for the geometric intelligence ecosystem.
 
-Maps your framework to current research:
+Maps JinnZ2 ecosystem framework to current research:
 
 | Your Concept | Research Implementation |
 |--------------|------------------------|
@@ -31,3 +31,21 @@ result = bridge.compute(
 # Validate against benchmarks
 validation = bridge.validate(result)
 print(validation.score)
+
+
+# Validate against benchmarks
+validation = bridge.validate(result)
+print(validation.score)
+```
+
+Install
+
+```bash
+pip install -e .
+```
+
+License
+
+MIT
+
+```
