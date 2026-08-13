@@ -1,0 +1,116 @@
+{
+  "schema": "claims v1 (see CLAIM_SCHEMA.py); every entry is dX/dt under scope",
+  "domain": "modern_mathematical_models",
+  "level": 6,
+  "module": "modern_sims.py",
+  "note": [
+    "This is the symbolic surface of modern_sims.py (Level 6). Unlike the",
+    "repo-level .claims file, these claims are NOT yet registered equations in",
+    "EquationRegistry — they are the mathematical frameworks the Level 6 sims",
+    "demonstrate numerically.",
+    "Each claim carries an 'anchor': the registry equation id it extends, and a",
+    "'morphism': the name of the transformation that would carry the anchor to",
+    "this framework. Promoting a claim means adding the target equation to",
+    "EquationRegistry._register_all() and the anchor->target edge to graph.py.",
+    "tests/test_modern_claims.py enforces that every anchor resolves against the",
+    "live registry and every 'sim' resolves against modern_sims.REGISTRY."
+  ],
+  "claims": [
+    {
+      "id": "koopman_lift",
+      "claim": "d(observable)/dt = Koopman_operator(observable): nonlinear flow on state space is linear flow on observable space; DMD recovers a finite-rank truncation with bounded reconstruction error",
+      "scope": "dissipative ODEs away from fixed-point degeneracy; demonstrated on Van der Pol, rank 6",
+      "sim": "koopman_dmd",
+      "anchor": "van_der_pol",
+      "morphism": "nonlinear_to_linear_observable_lift"
+    },
+    {
+      "id": "wasserstein_heat_flow",
+      "claim": "d(rho)/dt = -grad_W2 Entropy(rho): the heat equation is steepest descent of entropy in the Wasserstein metric (JKO scheme)",
+      "scope": "1D, entropic regularization eps>0, variance grows linearly in time",
+      "sim": "wasserstein_jko",
+      "anchor": "ficks_second_law",
+      "morphism": "diffusion_as_W2_gradient_flow"
+    },
+    {
+      "id": "fisher_rao_hyperbolic",
+      "claim": "d(theta)/dt follows geodesics of the Fisher-Rao metric; the Gaussian statistical manifold is the Poincare half-plane",
+      "scope": "parametric family p(x|mu,sigma), univariate",
+      "sim": "fisher_rao_flow",
+      "anchor": "kl_divergence",
+      "morphism": "information_to_geometry"
+    },
+    {
+      "id": "tda_lorenz",
+      "claim": "d(filtration)/d(epsilon) changes Betti numbers stepwise; persistent H1 features of the Lorenz attractor number 2 (the wings)",
+      "scope": "finite point cloud subsample of a long trajectory",
+      "sim": "persistent_homology",
+      "anchor": "lorenz_x",
+      "morphism": "dynamics_to_topology"
+    },
+    {
+      "id": "exceptional_point",
+      "claim": "d(eigenvalue)/d(gamma) diverges as sqrt(gamma - gamma_EP) near coalescence; encircling the exceptional point permutes eigen-sheets",
+      "scope": "2x2 PT-symmetric dimer with balanced gain/loss",
+      "sim": "pt_symmetric_dimer",
+      "anchor": "schrodinger_free",
+      "morphism": "hermitian_to_nonhermitian"
+    },
+    {
+      "id": "mps_entanglement_bound",
+      "claim": "d(fidelity)/d(chi) saturates to 1 once bond dimension chi covers the Schmidt rank; entanglement entropy bounds compression",
+      "scope": "1D gapped local Hamiltonian ground state (TFIM at criticality, N=10)",
+      "sim": "mps_compression",
+      "anchor": "schrodinger_free",
+      "morphism": "hilbert_space_to_tensor_network"
+    },
+    {
+      "id": "symplectic_preservation",
+      "claim": "d(energy_error)/dt is bounded for symplectic integrators and secularly growing for non-structure-preserving ones at equal step size",
+      "scope": "separable Hamiltonian systems, fixed dt; demonstrated on Kepler",
+      "sim": "symplectic_vs_rk4",
+      "anchor": "energy_conservation",
+      "morphism": "continuous_geometry_to_discrete_geometry"
+    },
+    {
+      "id": "fractional_superdiffusion",
+      "claim": "d(MSD)/dt ~ t^(2/alpha - 1) for the fractional heat equation with Laplacian exponent alpha/2; alpha<2 gives heavy-tailed Levy kernels",
+      "scope": "periodic 1D domain, spectral solver",
+      "sim": "fractional_diffusion",
+      "anchor": "ficks_second_law",
+      "morphism": "integer_to_fractional_laplacian"
+    },
+    {
+      "id": "detailed_fluctuation_theorem",
+      "claim": "d ln[P(+Sigma)/P(-Sigma)] / dSigma = 1/kB: entropy production obeys an exponential symmetry, not strict positivity, at the single-trajectory level",
+      "scope": "overdamped dragged harmonic trap, equilibrium initial ensemble; measured slope 0.95",
+      "sim": "fluctuation_theorem",
+      "anchor": "second_law_entropy",
+      "morphism": "macroscopic_law_to_microscopic_symmetry"
+    },
+    {
+      "id": "rotor_rigid_body",
+      "claim": "d(R)/dt = -(1/2) Omega_bivector R: rigid-body orientation evolves by bivector exponential in Cl(3); intermediate-axis instability emerges without coordinate singularities",
+      "scope": "torque-free asymmetric top, principal-axis frame",
+      "sim": "clifford_rotor",
+      "anchor": "newton_2",
+      "morphism": "matrix_to_geometric_algebra"
+    },
+    {
+      "id": "sinkhorn_convergence",
+      "claim": "d(coupling)/d(epsilon->0) concentrates onto the Monge transport map; Sinkhorn fixed-point iteration converges linearly for eps>0",
+      "scope": "discrete 1D marginals, quadratic ground cost",
+      "sim": "sinkhorn_ot",
+      "anchor": "kl_divergence",
+      "morphism": "continuous_OT_to_entropic_OT"
+    },
+    {
+      "id": "fno_spectral_learning",
+      "claim": "d(solution)/dt is approximated by a learned multiplier on the low Fourier modes; viscous Burgers concentrates energy in <10 modes",
+      "scope": "1D periodic Burgers, nu=0.05; 8-mode truncation error ~ percent",
+      "sim": "fourier_neural_op",
+      "anchor": "navier_stokes_1d",
+      "morphism": "pde_to_learned_operator"
+    }
+  ]
+}

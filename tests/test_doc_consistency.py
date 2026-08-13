@@ -36,7 +36,8 @@ def live():
     r._register_all()
     G = graph_module.build_morphism_graph(r)
 
-    modules = ["sims", "workon_sims", "todo_sims", "addon_sims", "connections_sims"]
+    modules = ["sims", "workon_sims", "todo_sims", "addon_sims", "connections_sims",
+               "modern_sims"]
     per_module = {m: len(importlib.import_module(m).REGISTRY) for m in modules}
 
     return {
@@ -58,12 +59,19 @@ DOC_FILES = [
     "README.md",
     "CLAUDE.md",
     "EXPLAINER.md",
+    "architecture.md",
+    "WorkOn_Explainer.md",
+    "Todo_Explainer.md",
+    "Addon_Explainer.md",
+    "Connections_Explainer.md",
+    "Modern_Explainer.md",
     "run_all_sims.py",
     "sims.py",
     "workon_sims.py",
     "todo_sims.py",
     "addon_sims.py",
     "connections_sims.py",
+    "modern_sims.py",
 ]
 
 CLAIM_PATTERNS = [
