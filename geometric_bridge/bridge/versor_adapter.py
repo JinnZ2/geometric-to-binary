@@ -1,9 +1,3 @@
-
----
-
-## `bridge/versor_adapter.py`
-
-```python
 """
 versor_adapter.py — Connects to Versor CGA architecture.
 """

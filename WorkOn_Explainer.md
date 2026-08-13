@@ -1,6 +1,10 @@
 # The "WorkOn" Document: A Plain-Language Guide
 
-*(Translating the deep math of `WorkOn.md` into concepts we can actually visualize)*
+*(Plain-language companion to [`workon_sims.py`](workon_sims.py).)*
+
+> `WorkOn.md`, the source document this translates, was extracted into
+> `workon_sims.py` + this file and removed from the repo in commit `256503c`.
+> It is recoverable with `git show 256503c^:WorkOn.md`.
 
 ---
 
@@ -90,11 +94,15 @@ The author started with a simple classical fluid equation, added a geometric fee
 
 ---
 
-## What are we doing next?
+## Where this lives in the repo
 
-We are going to build **`workon_sims.py`**. 
+The 5 Acts above are simulated by **[`workon_sims.py`](workon_sims.py)** (Level 2,
+9 sims), which turns the abstract math into runnable, visual simulations:
+the transition from classical diffusion to the quantum oscillator, the
+nonlinear bifurcation where the wavefunction collapses into a blob, and the
+Ricci flow pinching a 1D manifold into curvature islands.
 
-This script will take the abstract math from the 5 Acts above and turn them into runnable, visual simulations. We will simulate:
-1. The transition from classical diffusion to the quantum oscillator.
-2. The nonlinear bifurcation where the wavefunction collapses into a blob.
-3. The Ricci flow pinching a 1D manifold into curvature islands.
+```bash
+python run_all_sims.py --module workon_sims   # all of them
+python workon_sims.py --list                  # enumerate
+```
