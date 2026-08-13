@@ -2,12 +2,12 @@
 run_all_sims.py
 Unified entry point for all simulations in the geometric-to-binary repo.
 
-Runs all 56 simulations across the five sim modules and saves every plot
+Runs all 68 simulations across the six sim modules and saves every plot
 to the plots/ directory.
 
 Usage
 -----
-    python run_all_sims.py              # run all 56 simulations
+    python run_all_sims.py              # run all 68 simulations
     python run_all_sims.py --list       # list all available simulations
     python run_all_sims.py --module sims            # run one module
     python run_all_sims.py --sim lorenz             # run one simulation by name
@@ -22,6 +22,8 @@ Modules
     connections_sims — 12 sims: silicon phase-space framework, bridge-domain
                        coupling, sensor activation paths (field-linked to
                        Geometric-to-Binary-Computational-Bridge)
+    modern_sims      — 12 sims: Koopman / optimal transport / TDA / non-Hermitian /
+                       tensor networks / symplectic / fractional / geometric algebra
 """
 
 import argparse
@@ -37,6 +39,7 @@ MODULES = [
     ("todo_sims",        "Lorenz-PDE isomorphism / unified action regimes (4)"),
     ("addon_sims",       "4D phase diagram / DeWitt metric / entanglement (5)"),
     ("connections_sims", "Silicon phase-space + bridge coupling + sensor activation (12)"),
+    ("modern_sims",      "Modern mathematical models: Koopman → optimal transport → TDA (12)"),
 ]
 
 

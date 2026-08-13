@@ -3,6 +3,14 @@
 demo_unified.py — Demonstration of unified geometric bridge.
 """
 
+import os
+import sys
+
+import numpy as np
+
+# Ensure the package root is on the path, so the demo runs from any CWD
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from bridge.unified import GeometricBridge
 
 def main():

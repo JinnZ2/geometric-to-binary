@@ -1,6 +1,10 @@
 # The Geometry of Geometries: A Plain-Language Guide
 
-*(Translating the deep differential geometry of `Addon.md` into plain English)*
+*(Plain-language companion to [`addon_sims.py`](addon_sims.py).)*
+
+> `Addon.md`, the source document this translates, was extracted into
+> `addon_sims.py` + this file and removed from the repo in commit `c7a377c`.
+> It is recoverable with `git show c7a377c^:Addon.md`.
 
 ---
 
@@ -64,12 +68,15 @@ This jump is measured by a **Holonomy** (or monodromy) — a mathematical operat
 
 ---
 
-## What are we doing next?
+## Where this lives in the repo
 
-We are extracting the mathematical concepts from `Addon.md` into a clean, runnable script called **`addon_sims.py`**. 
+The four concepts above are simulated by **[`addon_sims.py`](addon_sims.py)**
+(Level 4, 5 sims): the full 4D phase diagram, the DeWitt supermetric distance
+between different geometries, the entanglement curvature between two coupled
+systems, the holonomy (twist) around a signature-transition singularity, and
+geodesic flow on the space of geometries.
 
-This script simulates:
-1. The full 4D Phase Diagram.
-2. The DeWitt supermetric distance between different geometries.
-3. The entanglement curvature between two coupled systems.
-4. The holonomy (twist) around a signature transition singularity.
+```bash
+python run_all_sims.py --module addon_sims   # all of them
+python addon_sims.py --list                  # enumerate
+```

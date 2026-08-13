@@ -25,13 +25,13 @@ Three pillars:
 2. `graph.py` — `EquationGraph` / `build_morphism_graph()`. 112 weighted directed
    edges. Weights combine dimensional inconsistency, constraint violation, and
    domain distance. The graph is **weakly connected** (enforced by tests).
-3. Sim modules — numerical realizations of the symbolic math. Five modules,
-   56 simulations total, all saving PNGs into `plots/`.
+3. Sim modules — numerical realizations of the symbolic math. Six modules,
+   68 simulations total, all saving PNGs into `plots/`.
 
 ## The sim module contract
 
 Every sim module (`sims.py`, `workon_sims.py`, `todo_sims.py`, `addon_sims.py`,
-`connections_sims.py`) exposes:
+`connections_sims.py`, `modern_sims.py`) exposes:
 
 - `REGISTRY: dict[str, {"fn": Callable, "title": str, ...}]` — populated via a
   `@sim(name, title)` decorator at import time.
@@ -53,11 +53,13 @@ change equations, sims, or edges, update everything in this list:
 | Equations | 90 | `EquationRegistry._equations` |
 | Domains | 23 | `PhysicsDomain` enum values actually used |
 | Morphism edges | 112 | `build_morphism_graph().G.number_of_edges()` |
-| Total sims | 56 | sum of `len(REGISTRY)` across 5 sim modules |
-| Sim split | 26 + 9 + 4 + 5 + 12 | sims / workon / todo / addon / connections |
+| Total sims | 68 | sum of `len(REGISTRY)` across 6 sim modules |
+| Sim split | 26 + 9 + 4 + 5 + 12 + 12 | sims / workon / todo / addon / connections / modern |
 
 References to these numbers appear in `README.md`, `EXPLAINER.md`,
 `run_all_sims.py` docstring, and `tests/test_registry.py` (as lower bounds).
+`tests/test_doc_consistency.py` fails the build on drift, so run it after any
+count change.
 Prefer lower-bound assertions in tests (`>= 90`, `>= 110`) over exact equality
 so adding equations doesn't break CI unnecessarily.
 
@@ -70,15 +72,22 @@ so adding equations doesn't break CI unnecessarily.
   morphism edge in `graph.py` (the `test_no_isolated_nodes` test enforces this).
 - New morphisms: ensure dimensional/constraint weights are non-negative
   (`test_edge_weights_are_non_negative`).
+- `sketches/` holds design sketches that do not run and are not imported by
+  anything. Do not wire them into the tested surface without finishing them
+  first — see `sketches/README.md` for the promotion criteria.
+- Explainer markdown stays at the repo root. `.fieldlink.json` exports
+  `Connections_Explainer.md` by root-relative path as part of the Bridge-repo
+  contract, so moving those files breaks the field link.
 
 ## Running things
 
 ```bash
 pip install -r requirements.txt
 pytest tests/ -v                       # smoke tests (registry + graph + playground)
-python run_all_sims.py --list          # enumerate all 56 sims
+python run_all_sims.py --list          # enumerate all 68 sims
 python run_all_sims.py --sim lorenz    # run one
-python run_all_sims.py                 # run everything (slow; ~54 plots)
+python run_all_sims.py                 # run everything (slow; 68 plots, ~100s)
+python run_all_sims.py --module modern_sims   # run one level
 python physics_playground.py           # interactive REPL-style demo
 ```
 
@@ -99,6 +108,16 @@ The repo carries the canonical `.claims` surface:
 round-trip parsing, and binary codec via `encode_claim`/`decode_claim`.
 The `rate` extractor sanitizes any literal `|` or `,` so the format stays
 parseable as the registry grows.
+
+`modern_claims.json` is a separate, hand-written surface covering `modern_sims.py`
+(Level 6). Nothing regenerates it. Its 12 entries are *candidate* registry nodes rather
+than registered equations, so each carries an `anchor` (the registry equation
+it extends) and a `morphism` (the transformation that would reach it).
+`tests/test_modern_claims.py` pins it to both registries: one claim per sim in
+`modern_sims.REGISTRY`, and every `anchor` resolving against
+`EquationRegistry`. Promoting a claim means registering the target equation in
+`physics_playground.py` and adding the `anchor → target` edge in `graph.py` —
+which also moves the equation/morphism counts above.
 
 ## Field link to the Bridge repo
 

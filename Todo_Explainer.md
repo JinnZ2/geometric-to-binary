@@ -1,6 +1,10 @@
 # The Quantum-to-Chaos Pipeline: A Plain-Language Guide
 
-*(Translating the deep math of `Todo.md` into concepts we can actually visualize)*
+*(Plain-language companion to [`todo_sims.py`](todo_sims.py).)*
+
+> `Todo.md`, the source document this translates, was extracted into
+> `todo_sims.py` + this file and removed from the repo in commit `ec31bea`.
+> It is recoverable with `git show ec31bea^:Todo.md`.
 
 ---
 
@@ -56,12 +60,15 @@ When the feedback is pushed to the extreme, the localized blobs become unstable.
 
 ---
 
-## What are we doing next?
+## Where this lives in the repo
 
-We are extracting the simulation code from `Todo.md` into a clean, runnable script called **`todo_sims.py`**. 
+The Master Equation above is simulated by **[`todo_sims.py`](todo_sims.py)**
+(Level 3, 4 sims), which plots the transition across all three regimes: the
+smooth quantum state, the bifurcating nonlinear blobs, the chaotic density
+fluctuations, and a phase diagram showing exactly where the boundaries between
+Quantum, Soliton and Chaos fall.
 
-This script simulates the Master Equation and visually plots the transition across all three regimes:
-1. The smooth quantum state.
-2. The bifurcating nonlinear blobs.
-3. The chaotic density fluctuations.
-4. A phase diagram showing exactly where the boundaries between Quantum, Soliton, and Chaos exist.
+```bash
+python run_all_sims.py --module todo_sims   # all of them
+python todo_sims.py --list                  # enumerate
+```

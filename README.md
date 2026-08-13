@@ -40,7 +40,7 @@ python physics_playground.py
 
 **3. Run all simulations:**
 ```bash
-python run_all_sims.py --list    # List all 56 simulations
+python run_all_sims.py --list    # List all 68 simulations
 python run_all_sims.py           # Run everything (saves to plots/)
 ```
 
@@ -48,7 +48,7 @@ python run_all_sims.py           # Run everything (saves to plots/)
 
 ## 🧪 The Simulation Hierarchy
 
-The repo includes 56 numerical simulations that prove the math works. They are split across five conceptual levels:
+The repo includes 68 numerical simulations that prove the math works. They are split across six conceptual levels:
 
 ### 1. Domain Physics (`sims.py` — 26 sims)
 Standard numerical simulations of the 90 registry equations. Covers everything from quantum tunneling and Schwarzschild orbits to the Lotka-Volterra predator-prey dynamics and Turing pattern formation.
@@ -68,6 +68,10 @@ Scales the theory up to a "Geometry of Geometries." Simulates the 4D Phase Diagr
 ### 5. The Silicon Phase-Space Framework (`connections_sims.py` — 12 sims)
 Bridges the abstract physics machinery to physical silicon computation. Models silicon as a **4-dimensional behavioral manifold** S = (n, d, ℓ, κ), with continuous softmax regime blending, rigorous geometry-to-silicon mapping derived from first principles (density-of-states integrals, winding numbers, spectral power-law fitting, Drude conductivity), feedback closure (binary output modifies the geometry field), and a full closed-loop dynamical system `dS/dt = F(n, d, ℓ, κ)` with trajectory tracking and phase-boundary detection. Also includes `bridge_domain_coupling` — a vector-space view of which Bridge-contract domains share physics substrate, computed as `C = MᵀM` from `.fieldlink.json` — and `sensor_activation_paths`, which closes the observational direction: given a sensing build (Tier 1/2/3 from `sensors_to_physics.json`), it computes which Bridge-contract domains can actually be **observed** as opposed to driven theoretically.
 *(Read the plain-language guide: [`Connections_Explainer.md`](Connections_Explainer.md))*
+
+### 6. Modern Mathematical Models (`modern_sims.py` — 12 sims)
+Asks whether the mathematics that has come to prominence in the last decade or two lives on the same continuous geometric space. Koopman/DMD operator theory (nonlinear flow as linear flow in observable space), Wasserstein gradient flow via the JKO scheme, Fisher-Rao information geometry, persistent homology of the Lorenz attractor, non-Hermitian exceptional points, matrix-product-state compression, symplectic vs. Runge-Kutta structure preservation, fractional Laplacians and superdiffusion, the detailed fluctuation theorem, Clifford-algebra rotor dynamics, Sinkhorn entropic optimal transport, and a hand-built Fourier neural operator on Burgers' equation. Each sim's symbolic claim lives in [`modern_claims.json`](modern_claims.json), anchored to an existing registry equation.
+*(Read the plain-language guide: [`Modern_Explainer.md`](Modern_Explainer.md))*
 
 > **Field Link — Computational Bridge Repo:**
 > The engineering pipeline (geometry_to_silicon_rigorous, silicon_to_graph, graph_to_binary, binary_to_geometry, closed_loop_pipeline) is implemented in the companion repository:
@@ -100,9 +104,44 @@ schrodinger_free → klein_gordon: schrodinger_to_klein_gordon
 
 ---
 
+## 🗂️ Repository Layout
+
+```text
+physics_playground.py       Pillar 1 — EquationRegistry, PhysicsEquation, PropellerTransform
+graph.py                    Pillar 2 — EquationGraph / build_morphism_graph
+run_all_sims.py             Unified entry point for every sim module
+
+sims.py                     Level 1 — domain physics                        (26 sims)
+workon_sims.py              Level 2 — Madelung / Ricci flow                  (9 sims)
+todo_sims.py                Level 3 — Lorenz-PDE isomorphism                 (4 sims)
+addon_sims.py               Level 4 — metric bundle / geometry of geometries (5 sims)
+connections_sims.py         Level 5 — silicon phase space                   (12 sims)
+modern_sims.py              Level 6 — modern mathematical models            (12 sims)
+
+*_Explainer.md              Plain-language guide per level
+EXPLAINER.md                Plain-language guide to the whole project
+architecture.md             One-page system diagram
+
+CLAIM_SCHEMA.py             Compressed claim format (verbatim from JinnZ2/experiments)
+CLAIM_TABLE.json            Repo-level claim lookup table
+.claims                     One claim per registered equation
+generate_claims.py          Deterministic regenerator for .claims
+modern_claims.json          Level 6 claims, each anchored to a registry equation
+
+.fieldlink.json             Machine-readable manifest binding this repo to the Bridge repo
+sensors_to_physics.json     Sensor → PhysicsDomain table (read by connections_sims.py)
+geometry_to_physics_bridge.py   Geometry ↔ physics ↔ silicon bridge layer
+geometric_bridge/           Integration layer mapping this ecosystem to current research
+sketches/                   Design sketches — not runnable, not tested (see sketches/README.md)
+tests/                      pytest suite
+plots/                      Generated figures (one per sim)
+```
+
+---
+
 ## ✅ Running Tests
 
-The repo includes a full `pytest` suite that verifies registry completeness, graph connectivity, and symbolic morphing.
+The repo includes a full `pytest` suite that verifies registry completeness, graph connectivity, symbolic morphing, claim round-tripping, and documentation count consistency.
 
 ```bash
 pytest tests/ -v
