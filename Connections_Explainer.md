@@ -26,6 +26,17 @@ $$\mathbf{S} = (n,\; d,\; \ell,\; \kappa_e,\; \kappa_o,\; \kappa_t,\; \kappa_m)$
 | Thermal coupling | $\kappa_t$ | Debye heat capacity × phonon MFP | Decoherence, dissipation |
 | Mechanical coupling | $\kappa_m$ | Strain energy from field gradients | MEMS, piezoelectric |
 
+> Note 2026-10-28 (co-authored): a light-driven topological switch in
+> MnBi2Te4 (ACS Nano 2026, doi:10.1021/acsnano.6c06828; a first-principles
+> **prediction**, read at press depth) lives on two axes this vector does not
+> carry: magnetic exchange / order and a topological invariant (Chern number
+> C). $\kappa_m$ is mechanical, not magnetic. In that material $n$ is a
+> constraint (the Fermi level must sit inside the exchange gap for the ON edge
+> state to read), not the switch. Not added to $\mathbf{S}$: S is scoped to Si,
+> where the Bridge repo finds no magnetic state channel (`Silicon/magnetic_authority.py`)
+> and the switch does not transfer (`Silicon/topological_switch_bounds.py`,
+> TSW-1..6). Design sketch: `sketches/light_exchange_switch.md`.
+
 This is a coordinate system of *behavior*, not space. The same silicon atom participates in all five regimes simultaneously — what changes is which regime *dominates*.
 
 ---

@@ -60,3 +60,12 @@ a test under `tests/`, and (c) is reachable from something a reader would
 find — a sim module's `REGISTRY`, or a section in `README.md`. If it produces
 plots, follow the sim module contract in [`CLAUDE.md`](../CLAUDE.md) so
 `run_all_sims.py` can drive it.
+
+## `light_exchange_switch.md`
+
+Note 2026-10-28: a one-file sketch of the two axes (`J_inter`, `C`) a
+light-switched magnetic topological material would add to `SiliconState`,
+occasioned by an ACS Nano 2026 prediction for MnBi2Te4. Not wired: C is an
+integer, so the step is a gap closing rather than a continuous morphism, and
+the companion Bridge repo reads the switch as not transferring to Si
+(`Silicon/topological_switch_bounds.py`, TSW-1..6).
